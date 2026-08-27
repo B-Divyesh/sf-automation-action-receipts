@@ -1,8 +1,8 @@
 {
   "format": "https://actionreceipts.dev/receipt/v1",
-  "receipt_id": "ar_9929af4f711ad4d1da3b4722def22926",
-  "created_at": "2026-08-27T22:38:42Z",
-  "updated_at": "2026-08-27T22:38:42Z",
+  "receipt_id": "ar_33bdc145bac9f37c5fc5a9acdc36f260",
+  "created_at": "2026-08-27T22:45:32Z",
+  "updated_at": "2026-08-27T22:45:32Z",
   "state": "sealed",
   "subject": {
     "summary": "Publish documentation site",
@@ -20,10 +20,11 @@
   "events": [
     {
       "sequence": 1,
-      "timestamp": "2026-08-27T22:38:42Z",
+      "timestamp": "2026-08-27T22:45:32Z",
       "kind": "authorization",
       "tool": "policy-gate",
       "input": {
+        "confidence": 0.95,
         "request": "change-482",
         "scope": "repo:docs/**"
       },
@@ -34,11 +35,11 @@
       "exit_code": 0,
       "artifacts": [],
       "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
-      "hash": "2a4307b031bc0ca4e3861bede5069c4999d07cd01cf8d383e0710e0751e4cd86"
+      "hash": "06e495088a6639fea11c790e2040e34870e1b093ce0234e11eb40d833808bae0"
     },
     {
       "sequence": 2,
-      "timestamp": "2026-08-27T22:38:42Z",
+      "timestamp": "2026-08-27T22:45:32Z",
       "kind": "tool",
       "tool": "shell",
       "input": {
@@ -56,16 +57,16 @@
       },
       "exit_code": 0,
       "artifacts": [],
-      "previous_hash": "2a4307b031bc0ca4e3861bede5069c4999d07cd01cf8d383e0710e0751e4cd86",
-      "hash": "249da0e6d1cad5048ff03c90011c8e4b0953010cedc97b265cebda00efb6efe9"
+      "previous_hash": "06e495088a6639fea11c790e2040e34870e1b093ce0234e11eb40d833808bae0",
+      "hash": "d872c5ed2d41dffe2615143dd46509ee3f260e1366d84ff05f2b1d9410cacad5"
     }
   ],
-  "chain_head": "249da0e6d1cad5048ff03c90011c8e4b0953010cedc97b265cebda00efb6efe9",
+  "chain_head": "d872c5ed2d41dffe2615143dd46509ee3f260e1366d84ff05f2b1d9410cacad5",
   "proof": {
     "algorithm": "Ed25519",
-    "public_key": "E9dskLjx9NvtsO+XI8MwsBSHQB6O3nkr0TUHAsUwY0s=",
-    "signed_at": "2026-08-27T22:38:42Z",
-    "bundle_sha256": "ddfd1469b034562c1bae68ad7e335e3318576b10b8e9c7e19a8a86578d0676de",
-    "signature": "UdN5syiSdsCFC5cxLJYKrnIev5qmYhLwAzE1TrFt9MkWx0j70aknQT61CV3/umwYhW2rZXlvzMi42FXlDZYHCQ=="
+    "public_key": "qLrGwjPmREhBFyrUXjXKRcx9wT5ea7GHNy+gQz3Y5hE=",
+    "signed_at": "2026-08-27T22:45:32Z",
+    "bundle_sha256": "7e8591d3d6a640838dfc88fa10ec8f24042d9bc2ba45e484095aa02ba773f632",
+    "signature": "uCzKUzqtAnpzp3yoxnCCaYW2QZBbkgn4aobOVfzNnS9ct28SfMDeDezVzi+7N1zburvoHvqoYSqpxu6H+VokBg=="
   }
 }

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://automation-action-receipts.sociobot.in/sitemap.xml

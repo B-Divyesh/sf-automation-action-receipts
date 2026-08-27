@@ -78,7 +78,10 @@ The public surface is intentionally small. A receipt contains `subject`,
 `policy`, ordered `events`, `chain_head`, and (after sealing) `proof`. Each event
 hash covers its sequence, timestamp, kind, tool, redacted data, artifact hashes,
 and previous hash. The Ed25519 signature covers the canonical receipt without
-the `proof.signature` field. Unknown fields are rejected by this v1 verifier.
+the `proof.signature` field using RFC 8785 JSON Canonicalization (JCS). Unknown
+fields are rejected by this v1 verifier.
+
+The machine-readable contract is [schema/receipt-v1.schema.json](schema/receipt-v1.schema.json).
 
 Redaction is applied before anything is stored. Sensitive JSON key names are
 redacted by default; add literal values with `--redact` or environment values

@@ -359,7 +359,7 @@ pub fn event_hash(event: &Event) -> Result<String, String> {
         artifacts: &event.artifacts,
         previous_hash: &event.previous_hash,
     };
-    let bytes = serde_json::to_vec(&payload).map_err(|e| e.to_string())?;
+    let bytes = serde_jcs::to_vec(&payload).map_err(|e| e.to_string())?;
     Ok(sha256(&bytes))
 }
 
@@ -391,7 +391,7 @@ pub fn verify_chain(receipt: &Receipt) -> Result<(), String> {
 }
 
 fn signing_bytes(receipt: &Receipt) -> Result<Vec<u8>, String> {
-    serde_json::to_vec(&SigningPayload {
+    serde_jcs::to_vec(&SigningPayload {
         format: &receipt.format,
         receipt_id: &receipt.receipt_id,
         created_at: &receipt.created_at,

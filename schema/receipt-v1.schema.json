@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://actionreceipts.dev/schema/receipt-v1.json",
+  "title": "Action Receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "receipt_id", "created_at", "updated_at", "state", "subject", "policy", "events", "chain_head"],
+  "properties": {
+    "format": { "const": "https://actionreceipts.dev/receipt/v1" },
+    "receipt_id": { "type": "string", "pattern": "^ar_[0-9a-f]{32}$" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "state": { "enum": ["open", "sealed"] },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "actor", "authorization", "scope"],
+      "properties": {
+        "summary": { "type": "string", "minLength": 1 },
+        "actor": { "type": "string", "minLength": 1 },
+        "authorization": { "type": "string", "minLength": 1 },
+        "scope": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["retention_days", "default_sensitive_keys", "redact_environment"],
+      "properties": {
+        "retention_days": { "type": "integer", "minimum": 1, "maximum": 3650 },
+        "default_sensitive_keys": { "const": true },
+        "redact_environment": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "events": { "type": "array", "items": { "$ref": "#/$defs/event" } },
+    "chain_head": { "$ref": "#/$defs/sha256" },
+    "proof": { "$ref": "#/$defs/proof" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "bytes"],
+      "properties": {
+        "path": { "type": "string" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "bytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "timestamp", "kind", "tool", "input", "output", "artifacts", "previous_hash", "hash"],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 1 },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "kind": { "type": "string", "minLength": 1 },
+        "tool": { "type": "string", "minLength": 1 },
+        "command": { "type": "array", "items": { "type": "string" } },
+        "input": true,
+        "output": true,
+        "exit_code": { "type": "integer" },
+        "artifacts": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+        "previous_hash": { "$ref": "#/$defs/sha256" },
+        "hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "public_key", "signed_at", "bundle_sha256", "signature"],
+      "properties": {
+        "algorithm": { "const": "Ed25519" },
+        "public_key": { "type": "string" },
+        "signed_at": { "type": "string", "format": "date-time" },
+        "bundle_sha256": { "$ref": "#/$defs/sha256" },
+        "signature": { "type": "string" }
+      }
+    }
+  }
+}

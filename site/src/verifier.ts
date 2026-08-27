@@ -1,3 +1,5 @@
+import canonicalize from 'canonicalize';
+
 export type Receipt = Record<string, any>;
 
 export type Verification = {
@@ -23,7 +25,7 @@ function fromBase64(value: string): Uint8Array {
 }
 
 async function digest(value: unknown): Promise<string> {
-  return hex(await crypto.subtle.digest('SHA-256', encoder.encode(JSON.stringify(value))));
+  return hex(await crypto.subtle.digest('SHA-256', encoder.encode(canonicalize(value))));
 }
 
 function eventPayload(event: Receipt) {
@@ -85,7 +87,7 @@ export async function verifyReceipt(receipt: Receipt): Promise<Verification> {
   }
   if (receipt.chain_head !== previous) return invalid(receipt, 'The chain head does not match the final event.');
 
-  const payload = encoder.encode(JSON.stringify(signingPayload(receipt)));
+  const payload = encoder.encode(canonicalize(signingPayload(receipt)));
   const bundleSha256 = hex(await crypto.subtle.digest('SHA-256', payload));
   if (receipt.proof.bundle_sha256 !== bundleSha256) return invalid(receipt, 'The signed bundle digest does not match.', true);
   try {
