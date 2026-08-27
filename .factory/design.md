@@ -63,8 +63,8 @@ three physical evidence cards linked by a cryptographic chain, used to explain
 the authorization → invocation → artifact sequence. It has no text, brand, or
 UI screenshot, so essential information remains in HTML. Generated on
 2026-08-27 with the factory Azure image deployment (`factory-image`) via
-`/opt/fleet/lib/gen-image.sh`; source PNG and generator metadata are retained
-under `artwork/source/`. Prompt:
+`/opt/fleet/lib/gen-image.sh`; generator metadata is retained under
+`artwork/source/` and the optimized delivery asset is 80 KB WebP. Prompt:
 
 > Use case: stylized-concept. Asset type: landing page explanatory hero.
 > Primary request: an editorial neo-brutalist still life explaining a signed
@@ -79,4 +79,3 @@ under `artwork/source/`. Prompt:
 
 License: original project asset generated for this product; distributed under
 the repository MIT license.
-

@@ -1,0 +1,71 @@
+{
+  "format": "https://actionreceipts.dev/receipt/v1",
+  "receipt_id": "ar_9929af4f711ad4d1da3b4722def22926",
+  "created_at": "2026-08-27T22:38:42Z",
+  "updated_at": "2026-08-27T22:38:42Z",
+  "state": "sealed",
+  "subject": {
+    "summary": "Publish documentation site",
+    "actor": "release-bot@ci",
+    "authorization": "change-482 approved by ops",
+    "scope": [
+      "repo:docs/**"
+    ]
+  },
+  "policy": {
+    "retention_days": 30,
+    "default_sensitive_keys": true,
+    "redact_environment": []
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "timestamp": "2026-08-27T22:38:42Z",
+      "kind": "authorization",
+      "tool": "policy-gate",
+      "input": {
+        "request": "change-482",
+        "scope": "repo:docs/**"
+      },
+      "output": {
+        "approver_ref": "ops/on-call",
+        "decision": "approved"
+      },
+      "exit_code": 0,
+      "artifacts": [],
+      "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "hash": "2a4307b031bc0ca4e3861bede5069c4999d07cd01cf8d383e0710e0751e4cd86"
+    },
+    {
+      "sequence": 2,
+      "timestamp": "2026-08-27T22:38:42Z",
+      "kind": "tool",
+      "tool": "shell",
+      "input": {
+        "command": [
+          "npm",
+          "run",
+          "build"
+        ],
+        "cwd": "/workspace/docs"
+      },
+      "output": {
+        "artifact": "dist/site/index.html",
+        "exit_code": 0,
+        "stdout": "built in 842ms"
+      },
+      "exit_code": 0,
+      "artifacts": [],
+      "previous_hash": "2a4307b031bc0ca4e3861bede5069c4999d07cd01cf8d383e0710e0751e4cd86",
+      "hash": "249da0e6d1cad5048ff03c90011c8e4b0953010cedc97b265cebda00efb6efe9"
+    }
+  ],
+  "chain_head": "249da0e6d1cad5048ff03c90011c8e4b0953010cedc97b265cebda00efb6efe9",
+  "proof": {
+    "algorithm": "Ed25519",
+    "public_key": "E9dskLjx9NvtsO+XI8MwsBSHQB6O3nkr0TUHAsUwY0s=",
+    "signed_at": "2026-08-27T22:38:42Z",
+    "bundle_sha256": "ddfd1469b034562c1bae68ad7e335e3318576b10b8e9c7e19a8a86578d0676de",
+    "signature": "UdN5syiSdsCFC5cxLJYKrnIev5qmYhLwAzE1TrFt9MkWx0j70aknQT61CV3/umwYhW2rZXlvzMi42FXlDZYHCQ=="
+  }
+}
