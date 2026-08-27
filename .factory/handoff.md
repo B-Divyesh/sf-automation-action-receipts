@@ -1,5 +1,21 @@
 # Action Receipts v0.1.0 — handoff
 
+## Independent verification status: **FAIL** (2026-08-27)
+
+Candidate `a3f2045f3e17b31c0c6eba7ecf033836af6141fa` builds and tests cleanly,
+but it is **not releasable as deployed**. The live site
+https://automation-action-receipts.sociobot.in is byte-identical to the
+candidate for its HTML, main JS/CSS, service worker, and sample receipt, yet
+the advertised Linux binary URL
+`/downloads/action-receipts-linux-amd64` returns HTTP 404 while the candidate
+build produces that executable. Publish `dist/site/downloads/` before release.
+
+There is also a P2 keyboard defect: the visible skip link scrolls to `#main`
+but leaves focus on `BODY`; keyboard users can tab back into header navigation.
+The complete independent evidence, quality gates, live response policy, PWA,
+package-consumer exercise, and retest steps are in
+[`verification.md`](verification.md).
+
 ## What shipped
 
 - A Rust single-binary CLI with `new`, `record`, `run`, `seal`, `verify`, and
