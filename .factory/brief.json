@@ -1,0 +1,12 @@
+{
+  "slug": "automation-action-receipts",
+  "title": "Action Receipts",
+  "territory": "devtools-data",
+  "user": "Teams letting agents, scripts, or CI automations change repositories and services who need a readable, tamper-evident answer to what ran, with which inputs, and under whose authorization.",
+  "smallest_useful_product": "A local sidecar/CLI protocol that accepts declared tool events, chains hashes, signs an exportable JSON/HTML receipt, and verifies it offline.",
+  "success_measure": "Reviewers can verify scope and command/artifact provenance for 95% of automated repository changes without opening raw logs.",
+  "artifact_class": "cli",
+  "monetization": "freemium",
+  "constraints": "Configurable redaction and retention are mandatory. Signatures prove bundle integrity, not correctness or user intent.",
+  "state": "RESEARCHED"
+}
