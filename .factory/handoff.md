@@ -22,7 +22,7 @@ cargo package --allow-dirty
 npm pack --dry-run
 ```
 
-All passed locally on 2026-08-28. `npm test`: 5 Rust library tests, 2 CLI integration tests, and 2 verifier unit tests. `npm run test:e2e`: 14 desktop/mobile browser tests, including full axe scans with zero violations. Every command in `.factory/claims.json` passed. Production build: JS 8.95 kB raw / 3.57 kB gzip; CSS 12.91 kB raw / 3.58 kB gzip.
+All passed locally on 2026-08-28 and again from a fresh clone at `/tmp/tmp.3GidLUhRFS`. `npm test`: 5 Rust library tests, 2 CLI integration tests, and 2 verifier unit tests. `npm run test:e2e`: 14 desktop/mobile browser tests, including full axe scans with zero violations. Every command in `.factory/claims.json` passed. Production build: JS 8.95 kB raw / 3.57 kB gzip; CSS 12.91 kB raw / 3.58 kB gzip.
 
 ## Deployment evidence
 
