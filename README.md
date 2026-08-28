@@ -1,131 +1,78 @@
 # Action Receipts
 
-Action Receipts is a local-first CLI and open JSON format for answering four
-questions about an automated change: what ran, with which inputs, against what
-declared scope, and under whose stated authorization. Events are SHA-256 hash
-chained; sealed bundles are signed with Ed25519 and verify without a server.
+Record and verify automated changes in a local receipt file. It is for teams
+using agents, scripts, or CI to change repositories and services.
 
-It is for teams that let agents, scripts, or CI change repositories and
-services. A valid receipt proves that the bundle has not changed since it was
-signed. It does **not** prove the actor's real-world identity, that the action
-was correct, or that the stated authorization was legitimate.
+Each event links to the event before it. A signature reveals later changes.
+Verification works without a server. A signature does not prove identity,
+approval legitimacy, occurrence, intent, or correctness.
 
 ## Install
 
-Build the single binary with Rust 1.85 or newer:
+Rust 1.85 or newer builds the single binary.
 
 ```sh
 cargo install --path .
 action-receipts --help
 ```
 
-Prebuilt Linux binaries are also exposed on the product site build under
-`downloads/`. Registry publishing is performed by the factory, not this repo.
+Download the Linux x64 binary from the product site, or use `cargo install`.
 
-## Usage
+## Try the demo
 
-Create an open receipt. The signing key is written separately with mode 0600;
-do not commit it.
+Run this command from any directory. It creates a realistic signed receipt in
+a new temporary directory and prints the JSON and HTML paths.
 
 ```sh
-action-receipts new \
-  --out deploy.receipt.json \
-  --actor "release-bot@ci" \
-  --authorization "change-482 approved by ops" \
-  --summary "Publish docs site" \
-  --scope "repo:docs/**" \
-  --retention-days 30 \
-  --redact-env DEPLOY_TOKEN
+action-receipts demo
 ```
 
-Run a command and record its arguments, working directory, redacted output,
-exit status, duration, and artifact digest:
+Open `/demo/` on the product site for the isolated browser sample. It shows a
+documentation deployment receipt and stores demo choices under `demo:` only.
+
+## Use your own change
 
 ```sh
-action-receipts run \
-  --receipt deploy.receipt.json \
-  --artifact dist/site/index.html \
-  -- npm run build
-```
-
-Declared integrations can append structured events without running a process:
-
-```sh
-action-receipts record \
-  --receipt deploy.receipt.json \
-  --kind tool \
-  --tool git \
-  --input-json '{"operation":"push","ref":"main"}' \
-  --output-json '{"commit":"abc123"}'
-```
-
-Seal both portable JSON and a self-contained readable HTML report, then verify
-either one offline:
-
-```sh
+action-receipts new --out deploy.receipt.json \
+  --actor "release-bot@ci" --authorization "change-482 approved" \
+  --summary "Publish docs" --scope "repo:docs/**"
+action-receipts run --receipt deploy.receipt.json -- npm run build
 action-receipts seal --receipt deploy.receipt.json --html deploy.receipt.html
-action-receipts verify deploy.receipt.json
-action-receipts verify deploy.receipt.html --json
+action-receipts verify deploy.receipt.json --json
 ```
 
-`verify --json` is stable for CI. It exits `0` when valid, `3` when integrity
-verification fails, and `1` for an I/O/runtime error. Clap usage errors exit
-`2`. All commands are non-interactive.
+`new` writes a separate signing key with mode 0600. Do not commit that key.
+`record` adds a tool result without running a process. `run` records command
+arguments, working directory, redacted output, exit status, duration, and file
+hashes. Redaction happens before receipt data is written.
 
-### Public receipt format (v1)
+## Receipt format
 
-The public surface is intentionally small. A receipt contains `subject`,
-`policy`, ordered `events`, `chain_head`, and (after sealing) `proof`. Each event
-hash covers its sequence, timestamp, kind, tool, redacted data, artifact hashes,
-and previous hash. The Ed25519 signature covers the canonical receipt without
-the `proof.signature` field using RFC 8785 JSON Canonicalization (JCS). Unknown
-fields are rejected by this v1 verifier.
+A receipt has `subject`, `policy`, ordered `events`, `chain_head`, and `proof`.
+Unknown fields are rejected. For implementers, signatures use Ed25519 over RFC
+8785 canonical JSON without `proof.signature`.
 
 The machine-readable contract is [schema/receipt-v1.schema.json](schema/receipt-v1.schema.json).
 
-Redaction is applied before anything is stored. Sensitive JSON key names are
-redacted by default; add literal values with `--redact` or environment values
-with `--redact-env`. Retention is declared in every receipt and can be enforced
-locally with `action-receipts prune --dir receipts --older-than 30 --dry-run`.
+## Browser verifier and privacy
 
-## Landing site and browser verifier
+The browser verifier checks receipt JSON in memory. Selected files are not
+uploaded. After one visit, its sample can reload offline. The CLI does not need
+an account. See the product privacy and terms pages.
 
-The Vite site documents the protocol and verifies receipt JSON locally using
-Web Crypto. Uploaded receipts never leave the device. It includes offline shell
-caching, privacy and terms pages, and the optional Sociobot license unlock for
-the Team policy kit.
+## Test, package, and deploy
 
 ```sh
-npm install
-npm run dev
+npm ci
 npm test
-npm run build:site  # -> deploy-ready dist/site, including the CLI binary download
-```
-
-## Test and package
-
-```sh
-cargo test --all-targets
+npm run build:site
+npm run test:e2e
 cargo package --allow-dirty
-npm test
 ```
 
-Tests cover the documented lifecycle, redaction, artifact hashing, HTML
-extraction, tamper detection, and browser verifier behavior.
-
-## Deploy
-
-Run `npm run build:site`; publish exactly `dist/site/` as a static site. This
-command builds the release CLI before Vite clears the output directory, then
-copies `downloads/action-receipts-linux-amd64` into the deploy root. The
-factory owns deployment, product registration, DNS, and registry credentials.
-
-## Privacy and security
-
-There is no telemetry. CLI data stays on disk. The browser verifier processes
-files in memory. Receipts can still expose commands, paths, and output, so use
-redaction and a retention window appropriate to the data. See `/privacy/` and
-`/terms/` on the site.
+`npm run build:site` creates `dist/site`, including the Linux download.
+Publish `dist/site/` as the static site. The factory owns deployment and
+registry publishing. The package is ready to publish with `cargo package`.
 
 ## License
 

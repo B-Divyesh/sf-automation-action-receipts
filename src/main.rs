@@ -20,6 +20,8 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Create and verify a realistic sample receipt in a new temporary directory
+    Demo,
     /// Start an open receipt and generate its separate Ed25519 key
     New(NewArgs),
     /// Append a structured event declared by an integration
@@ -138,6 +140,7 @@ fn main() {
 
 fn execute(cli: Cli) -> Result<i32, String> {
     match cli.command {
+        Commands::Demo => command_demo(),
         Commands::New(args) => command_new(args),
         Commands::Record(args) => command_record(args),
         Commands::Run(args) => command_run(args),
@@ -145,6 +148,73 @@ fn execute(cli: Cli) -> Result<i32, String> {
         Commands::Verify(args) => command_verify(args),
         Commands::Prune(args) => command_prune(args),
     }
+}
+
+fn command_demo() -> Result<i32, String> {
+    let nonce = format!(
+        "action-receipts-demo-{}-{}",
+        process::id(),
+        chrono::Utc::now().timestamp_nanos_opt().unwrap_or_default()
+    );
+    let dir = std::env::temp_dir().join(nonce);
+    fs::create_dir(&dir).map_err(|e| format!("could not create demo directory: {e}"))?;
+    let receipt_path = dir.join("docs-deployment.receipt.json");
+    let key_path = default_key_path(&receipt_path);
+    let html_path = dir.join("docs-deployment.receipt.html");
+    let artifact = dir.join("release-notes.txt");
+    fs::write(&artifact, "Documentation deployment completed\n")
+        .map_err(|e| format!("could not write demo artifact: {e}"))?;
+    let mut receipt = new_receipt(
+        Subject {
+            summary: "Publish documentation".into(),
+            actor: "release-bot@ci".into(),
+            authorization: "change-482 approved by operations".into(),
+            scope: vec!["repo:docs/**".into()],
+        },
+        Policy {
+            retention_days: 30,
+            default_sensitive_keys: true,
+            redact_environment: vec![],
+        },
+    );
+    write_key(&key_path, &generate_key())?;
+    append_event(
+        &mut receipt,
+        "tool".into(),
+        "policy-gate".into(),
+        None,
+        json!({"change":"482","scope":"repo:docs/**"}),
+        json!({"approved":true}),
+        Some(0),
+        vec![],
+        &[],
+    )?;
+    append_event(
+        &mut receipt,
+        "command".into(),
+        "npm".into(),
+        Some(vec!["npm".into(), "run".into(), "build".into()]),
+        json!({"cwd":"demo workspace"}),
+        json!({"stdout":{"text":"built docs","truncated":false},"stderr":{"text":"","truncated":false},"duration_ms":184,"spawn_error":null}),
+        Some(0),
+        vec![artifact_for(&artifact)?],
+        &[],
+    )?;
+    write_receipt(&receipt_path, &receipt)?;
+    let key: KeyFile =
+        serde_json::from_str(&fs::read_to_string(&key_path).map_err(|e| e.to_string())?)
+            .map_err(|e| e.to_string())?;
+    seal(&mut receipt, &key)?;
+    write_receipt(&receipt_path, &receipt)?;
+    fs::write(&html_path, html_report(&receipt)?).map_err(|e| e.to_string())?;
+    println!("Demo receipt created in {}", dir.display());
+    println!("JSON: {}", receipt_path.display());
+    println!("HTML: {}", html_path.display());
+    println!(
+        "Verify: action-receipts verify {} --json",
+        receipt_path.display()
+    );
+    Ok(0)
 }
 
 fn command_new(args: NewArgs) -> Result<i32, String> {

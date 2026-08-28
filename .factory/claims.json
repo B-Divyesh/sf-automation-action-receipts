@@ -1,0 +1,9 @@
+[
+  {"id":"cli-demo-lifecycle","claim":"The CLI demo creates signed JSON and HTML receipts in a new temporary directory.","where":"CLI help, README","test":"npm run test:cli -- claim_cli_demo_lifecycle","sandbox":"fresh temporary directory"},
+  {"id":"demo-isolated","claim":"The browser demo uses sample data and separate demo storage.","where":"/demo/ banner","test":"npm run test:e2e -- --grep @claim:demo-isolated","sandbox":"fresh browser context"},
+  {"id":"browser-verification","claim":"The browser verifies the receipt chain and reports tampering.","where":"/demo/ verifier","test":"npm run test:e2e -- --grep @claim:browser-verification","sandbox":"demo URL"},
+  {"id":"receipt-never-uploaded","claim":"Selected receipt data is not sent off origin.","where":"verifier and privacy page","test":"npm run test:e2e -- --grep @claim:receipt-never-uploaded","sandbox":"request log during demo"},
+  {"id":"two-mb-limit","claim":"The browser verifier rejects receipt text over 2 MB.","where":"file input","test":"npm run test:e2e -- --grep @claim:two-mb-limit","sandbox":"demo URL"},
+  {"id":"offline-reload","claim":"The demo reloads offline after the first visit.","where":"privacy page","test":"npm run test:e2e -- --grep @claim:offline-reload","sandbox":"cached demo then offline browser"},
+  {"id":"no-account-and-no-telemetry","claim":"The demo works without an account and makes no third-party requests.","where":"landing facts","test":"npm run test:e2e -- --grep @claim:no-account-and-no-telemetry","sandbox":"fresh demo request log"}
+]

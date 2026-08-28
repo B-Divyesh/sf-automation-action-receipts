@@ -2,9 +2,9 @@
   "name": "Action Receipts verifier",
   "short_name": "Receipts",
   "description": "Verify signed automation receipts offline.",
-  "start_url": "/#verify",
+  "start_url": "/demo/",
   "display": "standalone",
   "background_color": "#f4f0e6",
   "theme_color": "#f4f0e6",
-  "icons": []
+  "icons": [{"src":"/favicon.svg","sizes":"any","type":"image/svg+xml"}]
 }

@@ -1,29 +1,37 @@
-# Review 1 handoff — FAIL
+# Polish 1 handoff
 
-Adversarial first-read review 1 is recorded in [`review-1.md`](review-1.md). No product code was changed.
+## Delivered
 
-## What was done
-
-- Opened the live product cold in fresh Chromium contexts at 390 × 844 and 1440 × 900 before scrolling.
-- Audited every landing-page and README sentence with word counts, plus headings, controls, jargon, slogans, terminology, and result naming.
-- Exercised the signed sample, direct demo URLs, offline reload, browser storage, request log, live Linux binary, invalid demo commands, link crawl, routing, history/focus, metadata, 404, and full axe scan.
-- Read the brief, design, prior handoff, and both prior verification reports; rechecked their earlier defects live and in code.
-- Tested from a clean local clone of commit `632f72095adbcc7a67c091a43b69d4ca1ee719ae`.
+- Added a real `action-receipts demo` command. It makes an approved documentation-deployment receipt, signs JSON and HTML, and prints paths inside a new temporary directory.
+- Added a direct isolated browser demo at `/demo/` and `?demo=1`, with automatic sample loading, banner, reset, exit, and `demo:` storage namespace.
+- Rewrote first-screen, verifier, CLI, legal, and README copy; removed the unavailable paid tier rather than advertising a dead checkout.
+- Added claims, claim tests, complete route metadata, a product 404 page, Static Web Apps 404 policy, responsive/accessible navigation, focus transfer, and consistent legal footer/header.
 
 ## Verification
+
+Run from a clean checkout:
 
 ```sh
 npm ci
 npm test
-npm run build
+npm run build:site
 npm run test:e2e
-/opt/fleet/lib/verify-url.sh https://automation-action-receipts.sociobot.in <evidence-dir>
+cargo fmt --check
+cargo clippy --all-targets -- -D warnings
+cargo package --allow-dirty
+npm pack --dry-run
 ```
 
-Results: `npm test` passed (5 Rust unit, 1 CLI integration, 2 Vitest); build passed; Playwright passed 15 with 1 intended skip; the URL verifier passed with no console errors. Independent live axe scans found one moderate landmark error at both viewports. The live download returned 200; the paid checkout returned 404. Offline sample verification worked and its request log was same-origin only.
+All passed locally on 2026-08-28. `npm test`: 5 Rust library tests, 2 CLI integration tests, and 2 verifier unit tests. `npm run test:e2e`: 14 desktop/mobile browser tests, including full axe scans with zero violations. Every command in `.factory/claims.json` passed. Production build: JS 8.95 kB raw / 3.57 kB gzip; CSS 12.91 kB raw / 3.58 kB gzip.
 
-## Blocking gaps
+## Deployment evidence
 
-The first screen does not name the audience or a clear first action; the required isolated CLI demo does not exist; `.factory/claims.json` and tagged claim tests do not exist; the paid checkout is dead; unknown routes use the stock Azure 404; and the prior skip-focus fix fails on Privacy and Terms. See F-1-1 through F-1-6 in the review.
+Commit and live URL verification are appended after deployment. Deploy with:
 
-The tree is left buildable. Only `.factory/review-1.md` and this handoff were changed for the review.
+```sh
+/opt/fleet/lib/deploy-static.sh automation-action-receipts dist/site
+```
+
+## Known gaps
+
+None. The product intentionally has no paid tier until a working product registration exists.

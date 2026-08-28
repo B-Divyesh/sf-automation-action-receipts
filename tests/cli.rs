@@ -118,3 +118,32 @@ fn cli_creates_seals_and_verifies_json_and_html() {
         assert_eq!(result["event_count"], 2);
     }
 }
+
+// @claim:cli-demo-lifecycle
+#[test]
+fn claim_cli_demo_lifecycle_creates_isolated_signed_outputs() {
+    let output = cli().arg("demo").output().unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("JSON: "))
+        .unwrap();
+    let html = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("HTML: "))
+        .unwrap();
+    for path in [json, html] {
+        let verified = cli().args(["verify", path, "--json"]).output().unwrap();
+        assert!(
+            verified.status.success(),
+            "{}",
+            String::from_utf8_lossy(&verified.stderr)
+        );
+    }
+    let _ = fs::remove_dir_all(std::path::Path::new(json).parent().unwrap());
+}
