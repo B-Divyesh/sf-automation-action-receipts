@@ -1,6 +1,6 @@
 # Action Receipts v0.1.0 — repair handoff
 
-## Independent verification repair status: **PASS locally** (2026-08-28)
+## Independent verification repair status: **PASS and deployed** (2026-08-28)
 
 This repair addresses every release-blocking finding in the independent report
 for candidate `a3f2045f3e17b31c0c6eba7ecf033836af6141fa` (report commit
@@ -109,6 +109,32 @@ Mobile Lighthouse 13.0.1 against the repaired production build:
 Built asset budgets: JavaScript 10.55 KiB raw, CSS 12.33 KiB raw, hero WebP
 81.12 KiB, and Linux download 1.364 MiB. No runtime CDN, font request,
 telemetry, or analytics is present.
+
+## Deployment and live confirmation
+
+The product-source repair commit `c98cb09` was pushed to `main` and deployed
+with the work-order static configuration exactly as specified:
+
+```sh
+npm ci && npm run build:site
+/opt/fleet/lib/deploy-static.sh automation-action-receipts dist/site
+```
+
+Azure Static Web Apps deployment `a0ce05dd-0d2e-4143-bb78-9493610e8adf`
+succeeded (1,519,085-byte upload); the custom domain was Ready and HTTPS was
+200. Live verification at `https://automation-action-receipts.sociobot.in`
+found zero console errors and the required title, language, one h1, main
+landmark, and image/button labels.
+
+- `GET /downloads/action-receipts-linux-amd64` is **200** with
+  `Content-Type: application/octet-stream`, `Content-Length: 1364776`,
+  immutable one-year cache control, HSTS, CSP, `nosniff`, and the intended
+  referrer and permissions policies.
+- Live `index.html`, main JS/CSS, `sw.js`, sample receipt, and the Linux binary
+  matched the local deploy output byte-for-byte by SHA-256. The binary hash is
+  `ef178a18962c8c22fd07ea966bbb5b8b57cf90069ab28113d48ba8001f0da011`.
+- A live keyboard check confirmed Skip to content → focused `main#main` with
+  `#main`, then Tab → “Install the CLI”.
 
 ## Known boundaries
 
