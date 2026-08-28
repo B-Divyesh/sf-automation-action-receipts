@@ -27,4 +27,7 @@ recorded in `handoff.md`.
 | F-1-76 | Replaced storage description with the actual theme and `demo:` namespace behavior. | `@claim:demo-isolated`. |
 | F-1-78–F-1-79 | Removed host-retention and broad CDN/analytics promises; the request-log test covers the remaining concrete demo behavior. | `@claim:no-account-and-no-telemetry`; 404 live check. |
 
+Live recheck: `https://automation-action-receipts.sociobot.in/demo/` passed full
+Axe with no violations and a cold 390 px screenshot was saved at
+`/tmp/action-receipts-live-demo.png`. Unknown live routes return the product 404.
 No deferred or stubbed findings remain.

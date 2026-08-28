@@ -26,11 +26,15 @@ All passed locally on 2026-08-28. `npm test`: 5 Rust library tests, 2 CLI integr
 
 ## Deployment evidence
 
-Commit and live URL verification are appended after deployment. Deploy with:
+Commit `0056cb3cec9c7e82858b715972c72a10e75d9b10` is pushed to `main` and was
+deployed with `/opt/fleet/lib/deploy-static.sh automation-action-receipts dist/site`.
+Cold live checks on 2026-08-28 passed:
 
-```sh
-/opt/fleet/lib/deploy-static.sh automation-action-receipts dist/site
-```
+- `https://automation-action-receipts.sociobot.in/demo/` loaded title **Demo — Action Receipts**, one demo banner, and one verified receipt at 390 × 844.
+- Full live Axe returned `[]`; browser console errors returned `[]`.
+- `/opt/fleet/lib/verify-url.sh` returned HTTP 200 with `lang=en`, one h1, one main, alt text, labeled controls, and no console errors.
+- `https://automation-action-receipts.sociobot.in/not-a-real-route` returned 404 with the product 404 wording, not the Azure page.
+- Live screenshot: `/tmp/action-receipts-live-demo.png`; verifier evidence: `/tmp/tmp.PE28WVoUdG` (worker-local evidence paths).
 
 ## Known gaps
 
