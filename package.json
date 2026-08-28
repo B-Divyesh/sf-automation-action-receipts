@@ -8,20 +8,27 @@
   },
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build:site": "vite build",
-    "build:cli": "cargo build --release && node scripts/copy-binary.mjs",
-    "build": "npm run build:site && npm run build:cli",
+    "build:web": "vite build",
+    "build:cli": "cargo build --release",
+    "copy:binary": "node scripts/copy-binary.mjs",
+    "build:site": "npm run build:cli && npm run build:web && npm run copy:binary",
+    "build": "npm run build:site",
+    "typecheck": "tsc --noEmit",
     "test:cli": "cargo test --all-targets",
     "test:unit": "vitest run",
     "test": "npm run test:cli && npm run test:unit",
     "test:e2e": "playwright test",
-    "check": "cargo fmt --check && npm test && npm run build && npm run test:e2e"
+    "check": "cargo fmt --check && cargo clippy --all-targets -- -D warnings && npm run typecheck && npm test && npm run build && npm run test:e2e"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.10.2",
     "@types/node": "24.3.0",
     "playwright": "1.58.2",
+    "typescript": "5.9.3",
     "vite": "7.3.6",
     "vitest": "3.2.7"
+  },
+  "overrides": {
+    "playwright-core": "1.58.2"
   }
 }

@@ -39,6 +39,18 @@ function setupConnectivity() {
   render();
 }
 
+function setupSkipLink() {
+  const skip = document.querySelector<HTMLAnchorElement>('.skip-link');
+  const main = byId<HTMLElement>('main');
+  if (!skip || !main) return;
+  skip.addEventListener('click', (event) => {
+    event.preventDefault();
+    main.focus({ preventScroll: true });
+    main.scrollIntoView();
+    history.pushState(null, '', '#main');
+  });
+}
+
 function renderVerification(result: Verification) {
   const panel = byId<HTMLElement>('verification-result');
   if (!panel) return;
@@ -210,6 +222,7 @@ function setupPolicyBuilder() {
 
 setupTheme();
 setupConnectivity();
+setupSkipLink();
 setupVerifier();
 setupCopyButtons();
 setupLicense();

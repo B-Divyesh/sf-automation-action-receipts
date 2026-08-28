@@ -1,20 +1,31 @@
-# Action Receipts v0.1.0 — handoff
+# Action Receipts v0.1.0 — repair handoff
 
-## Independent verification status: **FAIL** (2026-08-27)
+## Independent verification repair status: **PASS locally** (2026-08-28)
 
-Candidate `a3f2045f3e17b31c0c6eba7ecf033836af6141fa` builds and tests cleanly,
-but it is **not releasable as deployed**. The live site
-https://automation-action-receipts.sociobot.in is byte-identical to the
-candidate for its HTML, main JS/CSS, service worker, and sample receipt, yet
-the advertised Linux binary URL
-`/downloads/action-receipts-linux-amd64` returns HTTP 404 while the candidate
-build produces that executable. Publish `dist/site/downloads/` before release.
-
-There is also a P2 keyboard defect: the visible skip link scrolls to `#main`
-but leaves focus on `BODY`; keyboard users can tab back into header navigation.
-The complete independent evidence, quality gates, live response policy, PWA,
-package-consumer exercise, and retest steps are in
+This repair addresses every release-blocking finding in the independent report
+for candidate `a3f2045f3e17b31c0c6eba7ecf033836af6141fa` (report commit
+`41b397f52ba3822c31143b0452c7490de165472f`). The original report remains at
 [`verification.md`](verification.md).
+
+- **P1 — missing production binary:** The static deployment contract calls
+  `npm run build:site`, but that script previously ran only Vite; the Linux
+  executable was copied only by a separate `npm run build` path. `build:site`
+  now builds the release Rust binary, runs Vite, then copies the executable
+  into `dist/site/downloads/` after Vite has emptied the output directory.
+  The deploy configuration now also gives `/downloads/*` immutable caching.
+  The built file is executable (`mode 755`) and 1,364,776 bytes. A desktop and
+  390px-browser regression asserts the visible link target, HTTP 200, and a
+  non-empty binary response at that exact URL.
+- **P2 — skip link focus:** `main#main` is programmatically focusable and the
+  skip-link activation now moves focus there while preserving `#main` and
+  scrolling to the landmark. A desktop and 390px keyboard regression confirms
+  Tab → Enter focuses main, and the next Tab reaches the first main-content
+  link rather than returning to header navigation.
+- **Type safety:** Added a strict TypeScript check to the release gate and
+  pinned `playwright-core` to the already pinned Playwright 1.58.2, avoiding a
+  mismatched transitive 1.62 type surface. The Web Crypto base64 bytes are now
+  explicitly backed by `ArrayBuffer`, satisfying the current DOM crypto types
+  without changing verification behavior.
 
 ## What shipped
 
@@ -48,32 +59,41 @@ From a clean clone:
 ```sh
 npm ci
 npm test
-npm run build
+npm run check
 ```
 
-The deploy root is exactly `dist/site/`, with `dist/site/index.html` present.
-The release binary is `dist/site/downloads/action-receipts-linux-amd64`.
+The deploy command is `npm run build:site` (also the target of `npm run build`)
+and the deploy root is exactly `dist/site/`, with `dist/site/index.html` and
+`dist/site/downloads/action-receipts-linux-amd64` present.
 
-Checks run on 2026-08-27:
+Checks run from a fresh `npm ci` on 2026-08-28:
 
 - `cargo fmt --check` — passed.
 - `cargo clippy --all-targets -- -D warnings` — passed.
+- `npm run typecheck` — passed (`tsc --noEmit`).
 - `npm test` — passed: 5 Rust library tests, 1 CLI lifecycle integration test,
   and 2 browser-verifier unit tests.
-- `npm run test:e2e` — passed: 11 Chromium desktop/390px tests, including
-  axe, signed sample, tamper rejection, paid unlock, and legal pages; 1
-  intentionally non-applicable desktop copy of the mobile-only assertion was
-  skipped.
+- `npm run check` — passed: all static/type/test/build gates plus Playwright:
+  15 passed across Chromium desktop and 390px mobile; 1 intentionally
+  non-applicable desktop copy of the mobile-only assertion was skipped.
 - `npm audit --audit-level=low` — 0 vulnerabilities.
-- `cargo package --allow-dirty --no-verify` — packaged 269.1 KiB / 137.1 KiB
-  compressed. Use `cargo package` for the publish-ready crate; the factory owns
-  registry credentials.
-- `npm pack --dry-run` — package contents validated; no publish was attempted.
+- `cargo package --allow-dirty` — verified and packaged 40 files, 284.2 KiB /
+  142.7 KiB compressed. A fresh extracted consumer install exposed the public
+  `action-receipts` binary and all six documented commands. Use `cargo package`
+  for the publish-ready crate; the factory owns registry credentials.
+- `npm pack --dry-run` — validated 36 files, 233.2 KiB unpacked / 129.6 KiB
+  compressed; no publishing was attempted.
 - `/opt/fleet/lib/verify-url.sh` against the local production preview — HTTP
   200, title/lang/main present, exactly one h1, no missing alt text, no unlabeled
-  buttons, and zero page/console errors.
+  buttons, and zero page/console errors. The local deployment URL returned the
+  advertised binary with HTTP 200 and `Content-Length: 1364776`.
+- PWA/privacy smoke: after activation and reload, the worker controlled the
+  page; an offline reload returned HTTP 200 with one main landmark;
+  `registration.update()` retained an active worker; and a fresh no-license
+  visit made no cross-origin requests. No telemetry, CDN font, or third-party
+  script is used.
 
-Mobile Lighthouse 13.0.1 against the production build:
+Mobile Lighthouse 13.0.1 against the repaired production build:
 
 | Category / metric | Result |
 | --- | ---: |
@@ -81,13 +101,14 @@ Mobile Lighthouse 13.0.1 against the production build:
 | Accessibility | 100 |
 | Best practices | 100 |
 | SEO | 100 |
-| Largest Contentful Paint | 1.5 s |
-| Total Blocking Time | 0 ms |
+| Largest Contentful Paint | 1.4 s |
+| Total Blocking Time | 20 ms |
 | Cumulative Layout Shift | 0 |
-| Initial transfer | 93 KiB |
+| Initial transfer | 95 KiB |
 
-Built asset budgets: JavaScript 10.27 KiB raw, CSS 12.33 KiB raw, hero WebP
-80 KiB. No runtime CDN, font request, telemetry, or analytics is present.
+Built asset budgets: JavaScript 10.55 KiB raw, CSS 12.33 KiB raw, hero WebP
+81.12 KiB, and Linux download 1.364 MiB. No runtime CDN, font request,
+telemetry, or analytics is present.
 
 ## Known boundaries
 

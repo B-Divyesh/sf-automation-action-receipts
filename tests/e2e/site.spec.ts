@@ -25,6 +25,25 @@ test('tampering produces a clear invalid state', async ({ page }) => {
   await expect(page.getByText(/changed after it was recorded/)).toBeVisible();
 });
 
+test('the advertised Linux CLI download is published in the deploy output', async ({ page }) => {
+  await page.goto('/#install');
+  await expect(page.getByRole('link', { name: 'Download Linux x64' })).toHaveAttribute('href', '/downloads/action-receipts-linux-amd64');
+  const response = await page.request.get('/downloads/action-receipts-linux-amd64');
+  expect(response.status()).toBe(200);
+  expect((await response.body()).byteLength).toBeGreaterThan(100_000);
+});
+
+test('skip link moves keyboard focus into main content', async ({ page }) => {
+  await page.goto('/');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('main')).toBeFocused();
+  await expect(page).toHaveURL(/#main$/);
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Install the CLI' })).toBeFocused();
+});
+
 test('license return is stored, stripped, and unlocks the policy kit', async ({ page }) => {
   await page.route('https://api.sociobot.in/**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: true, reason: 'ok', expires_at: null }) }));
   await page.goto('/?license=test-license#pricing');

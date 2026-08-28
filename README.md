@@ -99,7 +99,7 @@ the Team policy kit.
 npm install
 npm run dev
 npm test
-npm run build       # -> dist/site and the CLI binary download
+npm run build:site  # -> deploy-ready dist/site, including the CLI binary download
 ```
 
 ## Test and package
@@ -115,8 +115,10 @@ extraction, tamper detection, and browser verifier behavior.
 
 ## Deploy
 
-Run `npm run build`; publish `dist/site/` as a static site. The factory owns
-deployment, product registration, DNS, and registry credentials.
+Run `npm run build:site`; publish exactly `dist/site/` as a static site. This
+command builds the release CLI before Vite clears the output directory, then
+copies `downloads/action-receipts-linux-amd64` into the deploy root. The
+factory owns deployment, product registration, DNS, and registry credentials.
 
 ## Privacy and security
 

@@ -19,9 +19,11 @@ function hex(bytes: ArrayBuffer): string {
   return [...new Uint8Array(bytes)].map((value) => value.toString(16).padStart(2, '0')).join('');
 }
 
-function fromBase64(value: string): Uint8Array {
+function fromBase64(value: string): Uint8Array<ArrayBuffer> {
   const binary = atob(value);
-  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  const bytes = new Uint8Array(new ArrayBuffer(binary.length));
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  return bytes;
 }
 
 async function digest(value: unknown): Promise<string> {
