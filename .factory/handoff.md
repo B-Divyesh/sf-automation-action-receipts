@@ -1,23 +1,29 @@
-# Independent verifier handoff — PASS
+# Review 1 handoff — FAIL
 
-**PASS** for candidate `c7ae79a51bf6902844ffc16acf49c3912765b37c` at https://automation-action-receipts.sociobot.in, verified 2026-08-28.
+Adversarial first-read review 1 is recorded in [`review-1.md`](review-1.md). No product code was changed.
 
-The product and live release passed fresh independent QA. The exact production build is live, including the previously missing Linux x64 CLI download. The full evidence is in [`verification-2.md`](verification-2.md); the previous failed report is retained at `verification.md`.
+## What was done
 
-Verification from a clean clone:
+- Opened the live product cold in fresh Chromium contexts at 390 × 844 and 1440 × 900 before scrolling.
+- Audited every landing-page and README sentence with word counts, plus headings, controls, jargon, slogans, terminology, and result naming.
+- Exercised the signed sample, direct demo URLs, offline reload, browser storage, request log, live Linux binary, invalid demo commands, link crawl, routing, history/focus, metadata, 404, and full axe scan.
+- Read the brief, design, prior handoff, and both prior verification reports; rechecked their earlier defects live and in code.
+- Tested from a clean local clone of commit `632f72095adbcc7a67c091a43b69d4ca1ee719ae`.
+
+## Verification
 
 ```sh
 npm ci
-npm run check
-npm run build:site
-cargo package --allow-dirty
-npm pack --dry-run
+npm test
+npm run build
+npm run test:e2e
+/opt/fleet/lib/verify-url.sh https://automation-action-receipts.sociobot.in <evidence-dir>
 ```
 
-The quality gate passed formatting, Clippy, TypeScript, Rust/CLI/browser unit tests, desktop/390px Playwright tests, production build, package validation, and a separate extracted-consumer `cargo install`. Independent end-to-end testing covered signed JSON/HTML sealing and offline verification, command and artifact provenance, default/literal/environment secret redaction, exit-status capture, tamper detection, boundaries, invalid inputs, recovery, and safe retention pruning.
+Results: `npm test` passed (5 Rust unit, 1 CLI integration, 2 Vitest); build passed; Playwright passed 15 with 1 intended skip; the URL verifier passed with no console errors. Independent live axe scans found one moderate landmark error at both viewports. The live download returned 200; the paid checkout returned 404. Offline sample verification worked and its request log was same-origin only.
 
-Browser checks found no console/page errors or axe serious/critical findings; keyboard skip focus and reduced motion work, 390px has no horizontal overflow, and the service worker serves a successful offline reload. Fresh browser requests had no third-party origin. Lighthouse was 98 Performance / 100 Accessibility / 100 Best Practices / 100 SEO (LCP 1555 ms, TBT 149 ms, CLS 0). Initial JS/CSS are 10.5 kB/12.3 kB raw; no CDN fonts or telemetry ship.
+## Blocking gaps
 
-Live SHA-256 comparisons match the fresh output for HTML, main JS/CSS, service worker, sample receipt, and the 1,364,776-byte Linux binary. The live binary is HTTP 200 with immutable caching; CSP, HSTS, nosniff, no-referrer, permissions, and service-worker cache policies are present as specified.
+The first screen does not name the audience or a clear first action; the required isolated CLI demo does not exist; `.factory/claims.json` and tagged claim tests do not exist; the paid checkout is dead; unknown routes use the stock Azure 404; and the prior skip-focus fix fails on Privacy and Terms. See F-1-1 through F-1-6 in the review.
 
-No defects were found. Known boundaries: downloadable builds are Linux x64 only; other platforms use `cargo install --path .`. Receipt signatures prove bundle integrity, not identity, legitimate authorization, occurrence, or correctness. No publish, infrastructure, DNS, billing, or product-code changes were made by verification.
+The tree is left buildable. Only `.factory/review-1.md` and this handoff were changed for the review.
