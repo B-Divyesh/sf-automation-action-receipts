@@ -1,41 +1,29 @@
-# Polish 1 handoff
+# Review 2 handoff
 
 ## Delivered
 
-- Added a real `action-receipts demo` command. It makes an approved documentation-deployment receipt, signs JSON and HTML, and prints paths inside a new temporary directory.
-- Added a direct isolated browser demo at `/demo/` and `?demo=1`, with automatic sample loading, banner, reset, exit, and `demo:` storage namespace.
-- Rewrote first-screen, verifier, CLI, legal, and README copy; removed the unavailable paid tier rather than advertising a dead checkout.
-- Added claims, claim tests, complete route metadata, a product 404 page, Static Web Apps 404 policy, responsive/accessible navigation, focus transfer, and consistent legal footer/header.
+No product code was modified. Added `.factory/review-2.md`, an adversarial first-read review of the live deployment and the repository.
 
 ## Verification
 
-Run from a clean checkout:
+Reviewed from a fresh clone at the specified base after `npm ci --include=dev` and `npm run build`:
 
 ```sh
-npm ci
-npm test
-npm run build:site
-npm run test:e2e
-cargo fmt --check
-cargo clippy --all-targets -- -D warnings
-cargo package --allow-dirty
-npm pack --dry-run
+npm run test:cli -- claim_cli_demo_lifecycle
+npm run test:e2e -- --grep @claim:demo-isolated
+npm run test:e2e -- --grep @claim:browser-verification
+npm run test:e2e -- --grep @claim:receipt-never-uploaded
+npm run test:e2e -- --grep @claim:two-mb-limit
+npm run test:e2e -- --grep @claim:offline-reload
+npm run test:e2e -- --grep @claim:no-account-and-no-telemetry
 ```
 
-All passed locally on 2026-08-28 and again from a fresh clone at `/tmp/tmp.3GidLUhRFS`. `npm test`: 5 Rust library tests, 2 CLI integration tests, and 2 verifier unit tests. `npm run test:e2e`: 14 desktop/mobile browser tests, including full axe scans with zero violations. Every command in `.factory/claims.json` passed. Production build: JS 8.95 kB raw / 3.57 kB gzip; CSS 12.91 kB raw / 3.58 kB gzip.
+All listed claims except `demo-isolated` passed. That exact test fails on the mobile project because the demo banner/header causes horizontal overflow and puts the theme control outside the 390 px viewport. See F-2-1. The CLI demo itself was exercised from an unrelated temporary directory and left it unchanged.
 
-## Deployment evidence
+## Live evidence
 
-Commit `0056cb3cec9c7e82858b715972c72a10e75d9b10` is pushed to `main` and was
-deployed with `/opt/fleet/lib/deploy-static.sh automation-action-receipts dist/site`.
-Cold live checks on 2026-08-28 passed:
-
-- `https://automation-action-receipts.sociobot.in/demo/` loaded title **Demo — Action Receipts**, one demo banner, and one verified receipt at 390 × 844.
-- Full live Axe returned `[]`; browser console errors returned `[]`.
-- `/opt/fleet/lib/verify-url.sh` returned HTTP 200 with `lang=en`, one h1, one main, alt text, labeled controls, and no console errors.
-- `https://automation-action-receipts.sociobot.in/not-a-real-route` returned 404 with the product 404 wording, not the Azure page.
-- Live screenshot: `/tmp/action-receipts-live-demo.png`; verifier evidence: `/tmp/tmp.PE28WVoUdG` (worker-local evidence paths).
+The live home first screen was clear at both 390 × 844 and 1440 × 900. `/`, `/demo/`, `/privacy/`, `/terms/`, the Linux binary, robots, and sitemap returned 200; an unknown route returned the designed 404 with HTTP 404. The live 390 px demo had `scrollWidth` 473 / `clientWidth` 390, and its verified result began at y=1737.
 
 ## Known gaps
 
-None. The product intentionally has no paid tier until a working product registration exists.
+The review verdict is FAIL. Blocking work remains: responsive immediate-use demo, passing mobile demo claim, CLI terminal recording, complete per-route metadata, shared route announcement, consistent header/footer, and honest/tested copy claims. See `.factory/review-2.md`.
