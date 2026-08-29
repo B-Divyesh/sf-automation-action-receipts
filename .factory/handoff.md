@@ -1,50 +1,61 @@
-# Review 5 handoff
+# Polish 5 handoff
 
 ## Delivered
 
-- Completed the adversarial mobile/desktop review in `.factory/review-5.md`.
-- Re-ran the entire checklist rather than reviewing only the prior diff.
-- Changed no product code or product assets.
+- Repaired every remaining cumulative review finding from reviews 1–5.
+- Added the testable `mit-license` claim and mapped both the README and Terms
+  statements to it.
+- Mapped the landing/demo offline UI to its claims and extended the offline
+  regression to keep the status bar visible for both valid and tampered
+  receipts while networking is disabled.
+- Corrected the initial demo heading sequence from h1 → h3 to h1 → h2 and
+  added a direct initial-markup test.
+- Updated the catalog description: “Record automated changes as signed local
+  receipts, then verify them without a server.”
 
-Verdict: **FAIL** with two reopened blocking findings and one minor finding:
+Source repair commit: `e95a3e107ca943accf3ef051010b76e9cf21d71a` (pushed to
+`origin/main`). Static deployment:
+`8c12dfda-10c3-407b-9c89-518fdd6e2c55` at
+https://automation-action-receipts.sociobot.in.
 
-- F-1-56: the retained MIT statements have no claim-manifest entry or test.
-- F-1-72: the landing/demo offline status locations remain absent from the
-  manifest even though the underlying offline tests pass.
-- F-5-1: the demo's initial loading HTML skips from h1 to h3.
-
-## Verification
-
-Fresh clone: `/tmp/action-receipts-review5-clone.ethzXv/repo` at
-`c32b4ecf66aaa46c8000857669ada24ffccfe046`.
+## Run and verify
 
 ```sh
 npm ci --include=dev
-# Run each of the 19 commands in .factory/claims.json separately.
 npm run check
+while IFS=$'\t' read -r id command; do bash -lc "$command"; done < \
+  <(jq -r '.[] | [.id, .test] | @tsv' .factory/claims.json)
+cargo package --allow-dirty
 ```
 
-Results:
+`npm run build` produces `dist/site/`; the factory deploys that directory as
+the static site. The CLI package is ready for the factory registry workflow;
+do not publish it from this checkout.
 
-- 19/19 listed claim commands passed independently. Logs are under
-  `/tmp/action-receipts-review5/claims/`.
-- `npm run check` passed: formatting, Clippy, TypeScript, 5 Rust unit tests,
-  9 CLI tests, 2 Vitest tests, production build, and 29 Playwright passes with
-  one intended desktop skip.
-- Fresh live Chromium checks covered 390 × 844 and 1440 × 900, demo reset and
-  exit isolation, same-origin request logging, offline reload and verification,
-  deep links, Back/Forward focus announcements, keyboard mobile navigation,
-  every route in both themes with Axe, and the full link crawl.
-- `/opt/fleet/lib/verify-url.sh` passed live Home and Demo. Evidence is in
-  `/tmp/action-receipts-review5/verify-home/` and `verify-demo/`.
-- The live Linux x64 binary reported 0.1.0, ran its demo from an empty temporary
-  caller, left that caller unchanged, created JSON and HTML in a new OS temp
-  directory, and verified the two-event JSON receipt.
-- Live Home, Demo, Privacy, Terms, and 404 HTML matched the clean build
-  byte-for-byte.
+## Exact evidence
 
-## Remaining work
+- Independent clean clone:
+  `/tmp/action-receipts-polish5-clean-eGlyHR/repo` at `e95a3e1`.
+- `npm run check`: PASS — formatting, Clippy with warnings denied,
+  TypeScript, 5 Rust unit tests, 9 CLI integration tests, 3 Vitest tests,
+  production build, and 31 Playwright passes (one expected desktop skip).
+  Log: `/tmp/action-receipts-polish5-clean-eGlyHR/full-check.log`.
+- Every one of the 20 exact claim commands passed independently. Per-claim
+  logs are `/tmp/action-receipts-polish5-clean-eGlyHR/claim-<id>.log`; summary:
+  `/tmp/action-receipts-polish5-clean-eGlyHR/claims-summary.txt`.
+- `cargo package --allow-dirty`: PASS — 62 files, 552.3 KiB (267.3 KiB
+  compressed); package verification compiled successfully.
+- Cold live verification: `/opt/fleet/lib/verify-url.sh` passed with no
+  console errors. Public screenshots and audit are in
+  `/work/.evidence/automation-action-receipts-polish5-live-xjYPCg/`.
+- Live Playwright Axe integration found zero violations on Home, Demo, Privacy,
+  Terms, and 404 in both themes. The standalone Axe CLI could not start its
+  Selenium Chrome driver in this container, so the installed Playwright Axe
+  integration was used instead.
+- Live Lighthouse mobile: performance 100, accessibility 100, best practices
+  100, SEO 100; LCP 1.21 s, CLS 0, TBT 0. JSON:
+  `/work/.evidence/automation-action-receipts-polish5-live-xjYPCg/lighthouse-mobile.json`.
 
-Implement the three concrete fixes in `.factory/review-5.md`, add their
-regression coverage, and repeat the full claim matrix. No deployment was
-performed from this review work order.
+## Known gaps
+
+None. The full cumulative finding map is in `.factory/polish-5.md`.
