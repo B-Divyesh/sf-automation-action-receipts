@@ -1,1 +1,1 @@
-Record and verify automated repository and service changes with signed local receipts.
+Record and verify automated changes with signed local receipts.

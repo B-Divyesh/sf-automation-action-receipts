@@ -147,3 +147,194 @@ fn claim_cli_demo_lifecycle_creates_isolated_signed_outputs() {
     }
     let _ = fs::remove_dir_all(std::path::Path::new(json).parent().unwrap());
 }
+
+// @claim:declared-boundary-fields
+#[test]
+fn claim_declared_boundary_fields_are_written_before_events() {
+    let output = cli().arg("demo").output().unwrap();
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("JSON: "))
+        .unwrap();
+    let receipt: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(json).unwrap()).unwrap();
+    assert_eq!(receipt["subject"]["actor"], "release-bot@ci");
+    assert_eq!(
+        receipt["subject"]["authorization"],
+        "change-482 approved by operations"
+    );
+    assert_eq!(receipt["subject"]["scope"][0], "repo:docs/**");
+    assert_eq!(receipt["policy"]["retention_days"], 30);
+    assert_eq!(receipt["events"].as_array().unwrap().len(), 2);
+    let _ = fs::remove_dir_all(std::path::Path::new(json).parent().unwrap());
+}
+
+// @claim:command-provenance
+#[test]
+fn claim_command_provenance_records_command_output_and_artifact_hash() {
+    let dir = tempfile::tempdir().unwrap();
+    let receipt = dir.path().join("receipt.json");
+    let artifact = dir.path().join("output.txt");
+    fs::write(&artifact, "artifact contents").unwrap();
+    assert!(cli()
+        .args([
+            "new",
+            "--out",
+            receipt.to_str().unwrap(),
+            "--actor",
+            "bot",
+            "--authorization",
+            "approved",
+            "--summary",
+            "test",
+            "--scope",
+            "repo:**"
+        ])
+        .status()
+        .unwrap()
+        .success());
+    assert!(cli()
+        .args([
+            "run",
+            "--receipt",
+            receipt.to_str().unwrap(),
+            "--artifact",
+            artifact.to_str().unwrap(),
+            "--",
+            "sh",
+            "-c",
+            "printf done"
+        ])
+        .status()
+        .unwrap()
+        .success());
+    let value: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(receipt).unwrap()).unwrap();
+    let event = &value["events"][0];
+    assert_eq!(event["command"][0], "sh");
+    assert_eq!(event["output"]["stdout"]["text"], "done");
+    assert_eq!(event["exit_code"], 0);
+    assert!(event["output"]["duration_ms"].as_u64().is_some());
+    assert_eq!(event["artifacts"][0]["sha256"].as_str().unwrap().len(), 64);
+}
+
+// @claim:redact-before-storage
+#[test]
+fn claim_redact_before_storage_removes_literal_and_default_key_secrets() {
+    let dir = tempfile::tempdir().unwrap();
+    let receipt = dir.path().join("receipt.json");
+    assert!(cli()
+        .args([
+            "new",
+            "--out",
+            receipt.to_str().unwrap(),
+            "--actor",
+            "bot",
+            "--authorization",
+            "approved",
+            "--summary",
+            "test",
+            "--scope",
+            "repo:**"
+        ])
+        .status()
+        .unwrap()
+        .success());
+    assert!(cli()
+        .args([
+            "record",
+            "--receipt",
+            receipt.to_str().unwrap(),
+            "--tool",
+            "fixture",
+            "--input-json",
+            r#"{"token":"default-secret"}"#,
+            "--output-json",
+            r#"{"value":"literal-secret"}"#,
+            "--redact",
+            "literal-secret"
+        ])
+        .status()
+        .unwrap()
+        .success());
+    let saved = fs::read_to_string(receipt).unwrap();
+    assert!(!saved.contains("default-secret"));
+    assert!(!saved.contains("literal-secret"));
+    assert!(saved.contains("[REDACTED]"));
+}
+
+// @claim:json-html-export
+#[test]
+fn claim_json_html_export_embeds_the_signed_receipt() {
+    let output = cli().arg("demo").output().unwrap();
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("JSON: "))
+        .unwrap();
+    let html = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("HTML: "))
+        .unwrap();
+    let json_receipt = action_receipts::read_receipt(std::path::Path::new(json)).unwrap();
+    let html_receipt = action_receipts::read_receipt(std::path::Path::new(html)).unwrap();
+    assert_eq!(json_receipt, html_receipt);
+    assert!(fs::read_to_string(html)
+        .unwrap()
+        .contains("type=\"application/json\""));
+    let _ = fs::remove_dir_all(std::path::Path::new(json).parent().unwrap());
+}
+
+// @claim:private-key-permissions
+#[test]
+fn claim_private_key_is_separate_and_private() {
+    let dir = tempfile::tempdir().unwrap();
+    let receipt = dir.path().join("receipt.json");
+    assert!(cli()
+        .args([
+            "new",
+            "--out",
+            receipt.to_str().unwrap(),
+            "--actor",
+            "bot",
+            "--authorization",
+            "approved",
+            "--summary",
+            "test",
+            "--scope",
+            "repo:**"
+        ])
+        .status()
+        .unwrap()
+        .success());
+    let key = std::path::PathBuf::from(format!("{}.key", receipt.display()));
+    assert!(key.exists());
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        assert_eq!(
+            fs::metadata(key).unwrap().permissions().mode() & 0o777,
+            0o600
+        );
+    }
+}
+
+// @claim:unknown-fields-rejected
+#[test]
+fn claim_unknown_fields_are_rejected() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("bad.json");
+    fs::write(
+        &path,
+        r#"{"format":"https://actionreceipts.dev/receipt/v1","unexpected":true}"#,
+    )
+    .unwrap();
+    let result = cli()
+        .args(["verify", path.to_str().unwrap(), "--json"])
+        .output()
+        .unwrap();
+    assert!(!result.status.success());
+    assert!(String::from_utf8_lossy(&result.stderr).contains("unknown field"));
+}

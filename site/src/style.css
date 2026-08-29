@@ -16,8 +16,8 @@
 }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-.demo-banner { position: sticky; top: 0; z-index: 20; min-height: 44px; display: flex; gap: 12px; align-items: center; justify-content: center; padding: 8px 16px; color: var(--ink); background: var(--proof); border-bottom: 2px solid var(--ink); font-family: var(--mono); }
-.demo-banner button, .demo-banner a { min-height: 36px; padding: 5px 10px; color: var(--ink); background: var(--paper); border: 2px solid var(--ink); font: inherit; }
+.demo-banner { position: sticky; top: 0; z-index: 20; min-height: 44px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: center; padding: 8px 16px; color: var(--ink); background: var(--proof); border-bottom: 2px solid var(--ink); font-family: var(--mono); }
+.demo-banner button, .demo-banner a { min-height: 44px; padding: 8px 10px; color: var(--ink); background: var(--paper); border: 2px solid var(--ink); font: inherit; }
 .demo-banner a { display: inline-flex; align-items: center; }
 
 * { box-sizing: border-box; }
@@ -200,6 +200,9 @@ textarea { resize: vertical; margin-bottom: 18px; font-size: 13px; line-height: 
 
 .install-section { background: var(--ink); color: #fffdf7; }
 .terminal { border: 3px solid var(--paper); background: #0b0b09; box-shadow: 9px 9px 0 var(--signal); }
+.terminal-recording { max-width: 960px; margin: 0 0 42px; border: 3px solid var(--paper); background: #0b0b09; box-shadow: 9px 9px 0 var(--signal); }
+.terminal-recording img { width: 100%; }
+.terminal-recording figcaption { padding: 12px 18px; border-top: 2px solid var(--paper); color: #f7f3e8; font-size: 14px; }
 .terminal-bar { min-height: 54px; padding: 5px 10px 5px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--paper); background: var(--proof); color: #171713; font-weight: 900; }
 .copy-button { color: #171713; }
 pre { margin: 0; padding: clamp(22px, 4vw, 42px); overflow: auto; color: #f7f3e8; font: 14px/1.65 var(--mono); }
@@ -237,6 +240,14 @@ footer > p { grid-column: 1 / -1; margin: 0; color: var(--quiet); font-size: 13p
 .legal-main article { margin-top: 52px; }
 .legal-main h2 { margin: 44px 0 12px; font-size: 27px; }
 .legal-main p, .legal-main li { max-width: 72ch; }
+
+.demo-workbench { width: min(1200px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 44px; }
+.demo-workbench .verification-result { min-height: 320px; border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); }
+.demo-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin: 26px 0 0; border: 3px solid var(--ink); background: var(--sheet); }
+.demo-details div { padding: 16px; min-width: 0; }
+.demo-details div + div { border-left: 3px solid var(--ink); }
+.demo-details dt { font: 13px/1.2 var(--display); text-transform: uppercase; }
+.demo-details dd { margin: 8px 0 0; font-size: 14px; }
 
 html[data-theme="dark"] {
   color-scheme: dark;
@@ -284,6 +295,10 @@ html[data-theme="dark"] .price-card.featured { color: #171713; }
   .verifier-shell, .pricing-grid, .policy-builder { grid-template-columns: 1fr; }
   .verifier-inputs { border-right: 0; border-bottom: 3px solid var(--ink); }
   .verification-result { min-height: 360px; }
+  .demo-workbench { width: min(100% - 28px, 1200px); padding-top: 20px; }
+  .demo-workbench .verification-result { min-height: 260px; }
+  .demo-details { grid-template-columns: 1fr; }
+  .demo-details div + div { border-left: 0; border-top: 3px solid var(--ink); }
   .protocol-steps { grid-template-columns: 1fr; }
   .protocol-steps li + li { border-left: 0; border-top: 3px solid var(--ink); }
   .protocol-steps h3 { margin-top: 24px; }
@@ -293,6 +308,11 @@ html[data-theme="dark"] .price-card.featured { color: #171713; }
 }
 
 @media (max-width: 440px) {
+  .demo-banner { justify-content: flex-start; padding-inline: 14px; }
+  .demo-banner strong { width: 100%; }
+  .site-header { gap: 8px; }
+  .site-header nav { gap: 0; }
+  .site-header .theme-toggle { padding-inline: 8px; }
   h1 { font-size: 44px; }
   .hero-actions .button, .inline-actions .button, .download-row .button { width: 100%; }
   .trust-list { display: grid; }

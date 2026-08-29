@@ -79,3 +79,10 @@ UI screenshot, so essential information remains in HTML. Generated on
 
 License: original project asset generated for this product; distributed under
 the repository MIT license.
+
+`site/public/terminal-demo.svg` is a hand-made, self-hosted terminal recording
+frame. Its lines reproduce the stable path labels and outcome printed by the
+released `action-receipts demo` command, while its blinking cursor communicates
+that it is a recording rather than an install snippet. It uses only the product
+palette and has no external runtime dependency. Created 2026-08-29 by the
+project maintainers; distributed under MIT.
