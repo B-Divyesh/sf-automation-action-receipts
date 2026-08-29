@@ -11,6 +11,7 @@ dependencies = [
  "clap",
  "ed25519-dalek",
  "hex",
+ "libc",
  "rand_core",
  "serde",
  "serde_jcs",

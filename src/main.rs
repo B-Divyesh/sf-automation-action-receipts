@@ -110,6 +110,8 @@ struct VerifyArgs {
     path: PathBuf,
     #[arg(long)]
     json: bool,
+    #[arg(long, help = "Block network syscalls while verifying (Linux)")]
+    offline: bool,
 }
 
 #[derive(Args)]
@@ -382,6 +384,9 @@ fn command_seal(args: SealArgs) -> Result<i32, String> {
 }
 
 fn command_verify(args: VerifyArgs) -> Result<i32, String> {
+    if args.offline {
+        block_network_syscalls()?;
+    }
     let receipt = read_receipt(&args.path)?;
     let result = verify(&receipt);
     if args.json {
@@ -407,6 +412,93 @@ fn command_verify(args: VerifyArgs) -> Result<i32, String> {
         println!("        {}", result.message);
     }
     Ok(if result.valid { 0 } else { 3 })
+}
+
+/// Enforce the local verifier boundary for the whole verification process.
+/// The CLI has no network client, and this Linux-only guard makes that boundary
+/// observable when a caller needs to verify a receipt in a networkless job.
+#[cfg(target_os = "linux")]
+fn block_network_syscalls() -> Result<(), String> {
+    const LOAD_SYSCALL: u16 = (libc::BPF_LD | libc::BPF_W | libc::BPF_ABS) as u16;
+    const MATCH_SYSCALL: u16 = (libc::BPF_JMP | libc::BPF_JEQ | libc::BPF_K) as u16;
+    const RETURN: u16 = (libc::BPF_RET | libc::BPF_K) as u16;
+
+    let mut rules = vec![libc::sock_filter {
+        code: LOAD_SYSCALL,
+        jt: 0,
+        jf: 0,
+        k: 0,
+    }];
+    for syscall in [
+        libc::SYS_socket,
+        libc::SYS_socketpair,
+        libc::SYS_connect,
+        libc::SYS_accept,
+        libc::SYS_accept4,
+        libc::SYS_sendto,
+        libc::SYS_sendmsg,
+        libc::SYS_recvfrom,
+        libc::SYS_recvmsg,
+    ] {
+        rules.push(libc::sock_filter {
+            code: MATCH_SYSCALL,
+            jt: 0,
+            jf: 1,
+            k: syscall as u32,
+        });
+        rules.push(libc::sock_filter {
+            code: RETURN,
+            jt: 0,
+            jf: 0,
+            k: libc::SECCOMP_RET_ERRNO | libc::EPERM as u32,
+        });
+    }
+    rules.push(libc::sock_filter {
+        code: RETURN,
+        jt: 0,
+        jf: 0,
+        k: libc::SECCOMP_RET_ALLOW,
+    });
+    let filter = libc::sock_fprog {
+        len: rules.len() as u16,
+        filter: rules.as_mut_ptr(),
+    };
+    let no_new_privs = unsafe {
+        libc::prctl(
+            libc::PR_SET_NO_NEW_PRIVS,
+            1 as libc::c_ulong,
+            0 as libc::c_ulong,
+            0 as libc::c_ulong,
+            0 as libc::c_ulong,
+        )
+    };
+    if no_new_privs != 0 {
+        return Err(format!(
+            "could not lock verifier permissions: {}",
+            std::io::Error::last_os_error()
+        ));
+    }
+    let installed = unsafe {
+        libc::prctl(
+            libc::PR_SET_SECCOMP,
+            libc::SECCOMP_MODE_FILTER as libc::c_ulong,
+            &filter as *const libc::sock_fprog as libc::c_ulong,
+            0 as libc::c_ulong,
+            0 as libc::c_ulong,
+        )
+    };
+    if installed != 0 {
+        return Err(format!(
+            "could not block verifier networking: {}",
+            std::io::Error::last_os_error()
+        ));
+    }
+    Ok(())
+}
+
+#[cfg(not(target_os = "linux"))]
+fn block_network_syscalls() -> Result<(), String> {
+    Ok(())
 }
 
 fn command_prune(args: PruneArgs) -> Result<i32, String> {

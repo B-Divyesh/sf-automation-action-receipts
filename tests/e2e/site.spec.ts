@@ -1,4 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
+import { execFileSync } from 'node:child_process';
+import { existsSync, rmSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { expect, test } from 'playwright/test';
 
 const origin = 'http://127.0.0.1:4173';
@@ -57,6 +60,38 @@ test('@claim:offline-reload demo returns after the first cached visit', async ({
   await context.setOffline(true); await page.reload(); await expect(page.locator('main')).toBeVisible();
 });
 
+// @claim:local-verification
+test('@claim:local-verification verifies signed receipts with the CLI network lock and cached browser demo offline', async ({ page, context }) => {
+  const binary = resolve(process.cwd(), 'target/release/action-receipts');
+  expect(existsSync(binary)).toBeTruthy();
+  const run = (args: string[]) => execFileSync(binary, args, {
+    encoding: 'utf8',
+    env: { PATH: process.env.PATH ?? '' },
+  });
+  const demo = run(['demo']);
+  const receipt = demo.split('\n').find(line => line.startsWith('JSON: '))?.slice(6);
+  expect(receipt).toBeTruthy();
+  try {
+    const cliResult = JSON.parse(run(['verify', receipt!, '--json', '--offline']));
+    expect(cliResult.valid).toBe(true);
+
+    await page.goto('/demo/');
+    await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+    await page.reload();
+    await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
+    await context.setOffline(true);
+    await page.reload();
+    await expect(page.getByText('Receipt verified')).toBeVisible();
+    const box = page.getByRole('textbox', { name: 'Receipt JSON' });
+    await box.fill((await box.inputValue()).replace('policy-gate', 'changed-tool'));
+    await page.getByRole('button', { name: 'Verify receipt' }).click();
+    await expect(page.getByText('Verification failed')).toBeVisible();
+  } finally {
+    await context.setOffline(false);
+    if (receipt) rmSync(dirname(receipt), { recursive: true, force: true });
+  }
+});
+
 // @claim:no-third-party-demo-requests
 test('@claim:no-third-party-demo-requests permits only same-origin demo requests', async ({ page }) => {
   const requests: string[] = []; page.on('request', r => requests.push(r.url()));
@@ -70,11 +105,16 @@ test('@claim:site-metadata-and-routing provides complete metadata and consistent
   for (const path of ['/', '/demo/', '/privacy/', '/terms/', '/404.html']) {
     await page.goto(path);
     await expect(page.locator('h1')).toHaveCount(1); await expect(page.locator('main')).toHaveCount(1);
-    for (const selector of ['link[rel="canonical"]', 'link[rel="manifest"]', 'link[rel="apple-touch-icon"]', 'meta[property="og:title"]', 'meta[property="og:description"]', 'meta[property="og:image"]', 'meta[name="twitter:card"]', 'meta[name="twitter:title"]', 'meta[name="twitter:description"]', 'meta[name="twitter:image"]', '#route-announcement[aria-live="polite"]']) await expect(page.locator(selector)).toHaveCount(1);
+    for (const selector of ['link[rel="canonical"]', 'link[rel="manifest"]', 'link[rel="apple-touch-icon"]', 'meta[property="og:title"]', 'meta[property="og:description"]', 'meta[property="og:image"]', 'meta[property="og:image:width"][content="1200"]', 'meta[property="og:image:height"][content="630"]', 'meta[name="twitter:card"]', 'meta[name="twitter:title"]', 'meta[name="twitter:description"]', 'meta[name="twitter:image"]', '#route-announcement[aria-live="polite"]']) await expect(page.locator(selector)).toHaveCount(1);
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://automation-action-receipts.sociobot.in/social-card.webp');
     await expect(page.locator('header nav')).toHaveAttribute('aria-label', 'Primary navigation');
     await expect(page.locator('footer nav')).toHaveAttribute('aria-label', 'Legal and project links');
   }
   await page.goto('/404.html'); await expect(page.getByRole('heading', { name: 'That receipt page does not exist.' })).toBeVisible();
+  const socialSize = await page.evaluate(async () => new Promise<{ width: number; height: number }>((resolveImage, reject) => {
+    const image = new Image(); image.onload = () => resolveImage({ width: image.naturalWidth, height: image.naturalHeight }); image.onerror = reject; image.src = '/social-card.webp';
+  }));
+  expect(socialSize).toEqual({ width: 1200, height: 630 });
 });
 
 // @claim:terminal-recording

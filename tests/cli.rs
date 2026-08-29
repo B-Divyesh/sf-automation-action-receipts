@@ -137,6 +137,10 @@ fn claim_cli_demo_lifecycle_creates_isolated_signed_outputs() {
         .lines()
         .find_map(|line| line.strip_prefix("HTML: "))
         .unwrap();
+    let demo_dir = std::path::Path::new(json).parent().unwrap();
+    assert!(demo_dir.starts_with(std::env::temp_dir()));
+    assert!(std::path::Path::new(json).is_file());
+    assert!(std::path::Path::new(html).is_file());
     for path in [json, html] {
         let verified = cli().args(["verify", path, "--json"]).output().unwrap();
         assert!(
@@ -144,8 +148,11 @@ fn claim_cli_demo_lifecycle_creates_isolated_signed_outputs() {
             "{}",
             String::from_utf8_lossy(&verified.stderr)
         );
+        let result: serde_json::Value = serde_json::from_slice(&verified.stdout).unwrap();
+        assert_eq!(result["valid"], true);
+        assert_eq!(result["event_count"], 2);
     }
-    let _ = fs::remove_dir_all(std::path::Path::new(json).parent().unwrap());
+    let _ = fs::remove_dir_all(demo_dir);
 }
 
 // @claim:cli-no-account

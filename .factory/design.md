@@ -80,6 +80,12 @@ UI screenshot, so essential information remains in HTML. Generated on
 License: original project asset generated for this product; distributed under
 the repository MIT license.
 
+`site/public/social-card.webp` is a 1200 × 630 WebP crop made from the original
+receipt-chain illustration. It keeps the linked evidence cards, approval stamp,
+and sealed envelope legible in share previews without adding text or a separate
+visual language. Created 2026-08-29 with ImageMagick from the project-owned
+`receipt-chain.webp`; distributed under the repository MIT license.
+
 `site/public/terminal-demo.svg` is a hand-made, self-hosted terminal recording
 frame. Its lines reproduce the stable path labels and outcome printed by the
 released `action-receipts demo` command, while its blinking cursor communicates
