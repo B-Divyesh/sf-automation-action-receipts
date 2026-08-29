@@ -21,7 +21,9 @@ that a signature makes an automation morally correct.
   with an icon or word, never color alone.
 - Dark treatment uses `#11110F` canvas, `#1C1C18` sheets, `#F7F3E8` text,
   `#A8D929` proof, and `#FF7657` signal. The UI follows the device preference
-  and also exposes a labeled theme toggle.
+  and also exposes a labeled theme toggle. Inverse evidence bands stay fixed
+  at black/cream, and the verifier stays blueprint blue, preserving contrast
+  instead of reversing those semantic surfaces.
 
 ## Typography
 
