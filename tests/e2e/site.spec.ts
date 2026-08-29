@@ -47,7 +47,11 @@ test('@claim:two-mb-limit rejects receipt text larger than two megabytes', async
 
 // @claim:offline-reload
 test('@claim:offline-reload demo returns after the first cached visit', async ({ page, context }) => {
-  await page.goto('/demo/'); await page.reload(); await context.setOffline(true); await page.reload(); await expect(page.locator('main')).toBeVisible();
+  await page.goto('/demo/');
+  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  await page.reload();
+  await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
+  await context.setOffline(true); await page.reload(); await expect(page.locator('main')).toBeVisible();
 });
 
 // @claim:no-third-party-demo-requests
