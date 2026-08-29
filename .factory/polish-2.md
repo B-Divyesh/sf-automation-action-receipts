@@ -24,4 +24,15 @@ handoff after the production upload.
 | F-1-76, F-2-4 | Demo documentation and banner now say “separate demo storage”; test asserts reset preserves a real-data sentinel. | `@claim:demo-isolated`; `.factory/demo.md`. |
 | F-1-78–F-1-79 | Removed unprovable host-retention/advertising language and retained only a request-log claim that the demo makes no third-party request. | `@claim:no-third-party-demo-requests`. |
 
+## Final live evidence
+
+Cold checks were repeated after deployment at
+https://automation-action-receipts.sociobot.in. The live route matrix (home,
+demo, Privacy, Terms, and 404) has one h1 and main per route, zero Axe
+violations, zero mobile overflow, and no normal-route console errors. The demo
+banner and verified panel were visible above the 390 × 844 fold. Evidence:
+`/tmp/action-receipts-live-final.8AVT4M/live-routes.json`,
+`/tmp/action-receipts-live-final.8AVT4M/live-demo-mobile.png`, and
+`/tmp/action-receipts-live-final.8AVT4M/screenshot-mobile.png`.
+
 No deferred findings or TODOs remain.

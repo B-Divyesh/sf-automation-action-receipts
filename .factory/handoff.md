@@ -1,29 +1,56 @@
-# Review 2 handoff
+# Polish 2 handoff
 
 ## Delivered
 
-No product code was modified. Added `.factory/review-2.md`, an adversarial first-read review of the live deployment and the repository.
+Release repair commit: `5e22aa3cdb0f40a4b54b78a0ed8db1db5e56a5c9` (following
+`122a83d` and `9dfa467`). All are pushed to `origin/main` and deployed to
+https://automation-action-receipts.sociobot.in.
+
+The browser demo is now an isolated, first-screen working receipt: `/demo/`
+and `/?demo=1` load the same verified sample, banner, reset control, actor,
+scope, and command at 390 px. The reset removes only `demo:` storage. The
+landing page now includes the required self-hosted terminal recording of the
+real CLI demo. Metadata, route announcements, focus handling, shared chrome,
+404, copy, and claim coverage were repaired across every route.
 
 ## Verification
 
-Reviewed from a fresh clone at the specified base after `npm ci --include=dev` and `npm run build`:
+- Fresh clone: `/tmp/action-receipts-clean2.jikkS0` at `122a83d` ran
+  `npm ci --include=dev`, `npm test`, `npm run build`, and every exact command
+  in `.factory/claims.json`; all passed (`test-results/.last-run.json` records
+  `"status": "passed"`).
+- Latest local gate: `npm run check` passed. It includes formatting, clippy,
+  TypeScript, 13 Rust tests, 2 Vitest tests, production build, and 18
+  Playwright checks across desktop and 390 px mobile.
+- Production build: initial JavaScript is 9.11 kB raw / 3.61 kB gzip and CSS
+  is 14.18 kB raw / 3.79 kB gzip. `dist/site` contains the release binary.
+- Deployment: Static Web Apps deployment `36937edc-a768-4e37-8831-219e8dfce5d8`
+  completed successfully.
+- Cold live verification: `/opt/fleet/lib/verify-url.sh` passed at
+  https://automation-action-receipts.sociobot.in/ with HTTP 200, title/lang,
+  one h1, main landmark, alt text, labeled buttons, and no console errors.
+  Evidence: `/tmp/action-receipts-live-final.8AVT4M/verify.json` and
+  `/tmp/action-receipts-live-final.8AVT4M/screenshot-mobile.png`.
+- Live Playwright+Axe check passed on `/`, `/demo/`, `/privacy/`, `/terms/`,
+  and `/404.html`: zero violations, one h1 and main each, no mobile overflow,
+  and no console errors. `/demo/` had a visible banner, verified panel, and
+  actor before the 390 px fold. Evidence:
+  `/tmp/action-receipts-live-final.8AVT4M/live-routes.json` and
+  `/tmp/action-receipts-live-final.8AVT4M/live-demo-mobile.png`.
+- The standalone `@axe-core/cli` could not start because its Selenium Chrome
+  binary is absent in this worker. The repository and live checks use the
+  installed Playwright Chromium with `@axe-core/playwright`, which completed
+  successfully on every route and viewport.
+
+## Run and deploy
 
 ```sh
-npm run test:cli -- claim_cli_demo_lifecycle
-npm run test:e2e -- --grep @claim:demo-isolated
-npm run test:e2e -- --grep @claim:browser-verification
-npm run test:e2e -- --grep @claim:receipt-never-uploaded
-npm run test:e2e -- --grep @claim:two-mb-limit
-npm run test:e2e -- --grep @claim:offline-reload
-npm run test:e2e -- --grep @claim:no-account-and-no-telemetry
+npm ci --include=dev
+npm run check
+npm run build:site
+/opt/fleet/lib/deploy-static.sh automation-action-receipts dist/site
 ```
-
-All listed claims except `demo-isolated` passed. That exact test fails on the mobile project because the demo banner/header causes horizontal overflow and puts the theme control outside the 390 px viewport. See F-2-1. The CLI demo itself was exercised from an unrelated temporary directory and left it unchanged.
-
-## Live evidence
-
-The live home first screen was clear at both 390 × 844 and 1440 × 900. `/`, `/demo/`, `/privacy/`, `/terms/`, the Linux binary, robots, and sitemap returned 200; an unknown route returned the designed 404 with HTTP 404. The live 390 px demo had `scrollWidth` 473 / `clientWidth` 390, and its verified result began at y=1737.
 
 ## Known gaps
 
-The review verdict is FAIL. Blocking work remains: responsive immediate-use demo, passing mobile demo claim, CLI terminal recording, complete per-route metadata, shared route announcement, consistent header/footer, and honest/tested copy claims. See `.factory/review-2.md`.
+None. No review finding, TODO, stub, or deferred acceptance item remains.
