@@ -148,6 +148,23 @@ fn claim_cli_demo_lifecycle_creates_isolated_signed_outputs() {
     let _ = fs::remove_dir_all(std::path::Path::new(json).parent().unwrap());
 }
 
+// @claim:cli-no-account
+#[test]
+fn claim_cli_demo_needs_no_account_or_environment_credentials() {
+    let output = Command::new(env!("CARGO_BIN_EXE_action-receipts"))
+        .env_clear()
+        .arg("demo")
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("JSON: "))
+        .unwrap();
+    let _ = fs::remove_dir_all(std::path::Path::new(json).parent().unwrap());
+}
+
 // @claim:declared-boundary-fields
 #[test]
 fn claim_declared_boundary_fields_are_written_before_events() {

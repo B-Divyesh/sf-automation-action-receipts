@@ -1,5 +1,6 @@
 [
   {"id":"cli-demo-lifecycle","claim":"The CLI demo creates signed JSON and HTML receipts in a new temporary directory.","where":"CLI help, README","test":"npm run test:cli -- claim_cli_demo_lifecycle_creates_isolated_signed_outputs","sandbox":"fresh temporary directory"},
+  {"id":"cli-no-account","claim":"The CLI demo runs without an account or environment credentials.","where":"landing facts, privacy page","test":"npm run test:cli -- claim_cli_demo_needs_no_account_or_environment_credentials","sandbox":"fresh process with an empty environment"},
   {"id":"declared-boundary-fields","claim":"The demo receipt records the actor, approval, scope, retention policy, and linked events.","where":"README","test":"npm run test:cli -- claim_declared_boundary_fields_are_written_before_events","sandbox":"fresh CLI demo"},
   {"id":"command-provenance","claim":"A recorded command stores its arguments, result, duration, exit status, and file hash.","where":"README","test":"npm run test:cli -- claim_command_provenance_records_command_output_and_artifact_hash","sandbox":"fresh temporary directory"},
   {"id":"redact-before-storage","claim":"Literal and default-key secrets are redacted before receipt data is stored.","where":"README","test":"npm run test:cli -- claim_redact_before_storage_removes_literal_and_default_key_secrets","sandbox":"fresh temporary directory"},

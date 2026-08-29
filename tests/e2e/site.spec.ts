@@ -35,7 +35,10 @@ test('@claim:receipt-never-uploaded processes selected receipt text without a da
   await page.goto('/demo/'); await expect(page.getByText('Receipt verified')).toBeVisible();
   const countBefore = requests.length;
   const box = page.getByRole('textbox', { name: 'Receipt JSON' });
-  await box.fill(await box.inputValue()); await page.getByRole('button', { name: 'Verify receipt' }).click();
+  const receipt = await box.inputValue();
+  await box.fill(receipt); await page.getByRole('button', { name: 'Verify receipt' }).click();
+  await page.getByLabel('Choose a receipt JSON').setInputFiles({ name: 'receipt.json', mimeType: 'application/json', buffer: Buffer.from(receipt) });
+  await expect(page.getByText('Receipt verified')).toBeVisible();
   expect(requests.slice(countBefore)).toEqual([]);
 });
 
