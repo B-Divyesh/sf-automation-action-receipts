@@ -2,8 +2,9 @@
 
 ## Delivered
 
-Release repair commit: `5e22aa3cdb0f40a4b54b78a0ed8db1db5e56a5c9` (following
-`122a83d` and `9dfa467`). All are pushed to `origin/main` and deployed to
+Release repair commit: `5e22aa3cdb0f40a4b54b78a0ed8db1db5e56a5c9`, with final
+claim-coverage commit `e56d1b7dbd9ea1addcf6672b30452a5709dd9bf7`. All are pushed
+to `origin/main`; the product artifact is deployed to
 https://automation-action-receipts.sociobot.in.
 
 The browser demo is now an isolated, first-screen working receipt: `/demo/`
@@ -15,12 +16,12 @@ real CLI demo. Metadata, route announcements, focus handling, shared chrome,
 
 ## Verification
 
-- Fresh clone: `/tmp/action-receipts-clean2.jikkS0` at `122a83d` ran
+- Fresh clone: `/tmp/action-receipts-clean3.nowo8H` at `e56d1b7` ran
   `npm ci --include=dev`, `npm test`, `npm run build`, and every exact command
   in `.factory/claims.json`; all passed (`test-results/.last-run.json` records
   `"status": "passed"`).
 - Latest local gate: `npm run check` passed. It includes formatting, clippy,
-  TypeScript, 13 Rust tests, 2 Vitest tests, production build, and 18
+  TypeScript, 14 Rust tests, 2 Vitest tests, production build, and 18
   Playwright checks across desktop and 390 px mobile.
 - Production build: initial JavaScript is 9.11 kB raw / 3.61 kB gzip and CSS
   is 14.18 kB raw / 3.79 kB gzip. `dist/site` contains the release binary.
