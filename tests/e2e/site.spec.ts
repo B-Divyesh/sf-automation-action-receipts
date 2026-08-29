@@ -201,7 +201,13 @@ test('routes, focus, mobile width, and axe have no violations', async ({ page })
   await privacy.click(); await expect(page.getByRole('heading', { name: 'Privacy' })).toBeFocused(); await expect(page.locator('#route-announcement')).toContainText('Privacy');
   await page.goBack(); await expect(page.getByRole('heading', { name: 'Record and verify automated changes.' })).toBeFocused(); await expect(page.locator('#route-announcement')).toContainText('Record and verify automated changes.');
   await page.goForward(); await expect(page.getByRole('heading', { name: 'Privacy' })).toBeFocused(); await expect(page.locator('#route-announcement')).toContainText('Privacy');
-  for (const path of ['/', '/demo/', '/privacy/', '/terms/', '/404.html']) { await page.goto(path); const results = await new AxeBuilder({ page }).analyze(); expect(results.violations).toEqual([]); }
+  for (const path of ['/', '/demo/', '/privacy/', '/terms/', '/404.html']) {
+    await page.goto(path);
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate(value => { document.documentElement.dataset.theme = value; }, theme);
+      const results = await new AxeBuilder({ page }).analyze(); expect(results.violations).toEqual([]);
+    }
+  }
   await page.goto('/demo/'); expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(await page.evaluate(() => document.documentElement.clientWidth));
 });
 
