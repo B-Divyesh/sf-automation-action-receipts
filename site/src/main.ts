@@ -15,13 +15,54 @@ function setupTheme() {
   button.addEventListener('click', () => { const dark = document.documentElement.dataset.theme === 'dark'; document.documentElement.dataset.theme = dark ? 'light' : 'dark'; localStorage.setItem(store('ar_theme'), dark ? 'light' : 'dark'); paint(); }); paint();
 }
 function setupSkipLink() { const skip = document.querySelector<HTMLAnchorElement>('.skip-link'); const main = byId<HTMLElement>('main'); if (!skip || !main) return; skip.addEventListener('click', (e) => { e.preventDefault(); main.focus({ preventScroll: true }); main.scrollIntoView(); history.pushState(null, '', '#main'); }); }
-function announceRoute() { const heading = document.querySelector<HTMLElement>('h1'); if (!heading) return; heading.tabIndex = -1; heading.focus(); byId<HTMLElement>('route-announcement')?.replaceChildren(document.createTextNode(heading.textContent ?? 'Page loaded')); }
-function setupRouteFocus() { if (sessionStorage.getItem('ar-route-focus') === '1') { sessionStorage.removeItem('ar-route-focus'); requestAnimationFrame(announceRoute); } addEventListener('popstate', () => requestAnimationFrame(announceRoute)); document.querySelectorAll<HTMLAnchorElement>('a[href^="/"]').forEach(link => link.addEventListener('click', () => sessionStorage.setItem('ar-route-focus', '1'))); }
+function announceRoute() { const heading = document.querySelector<HTMLElement>('h1'); if (!heading) return; heading.tabIndex = -1; heading.focus({ preventScroll: true }); byId<HTMLElement>('route-announcement')?.replaceChildren(document.createTextNode(heading.textContent ?? 'Page loaded')); }
+function setupRouteFocus() {
+  const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  if (sessionStorage.getItem('ar-route-focus') === '1' || navigation?.type === 'back_forward') {
+    sessionStorage.removeItem('ar-route-focus');
+    requestAnimationFrame(announceRoute);
+  }
+  addEventListener('pageshow', (event) => { if (event.persisted) requestAnimationFrame(announceRoute); });
+  document.querySelectorAll<HTMLAnchorElement>('a[href^="/"]').forEach(link => link.addEventListener('click', () => {
+    const destination = new URL(link.href);
+    if (destination.pathname !== location.pathname || destination.search !== location.search) sessionStorage.setItem('ar-route-focus', '1');
+  }));
+}
+function setupMobileNavigation() {
+  const button = byId<HTMLButtonElement>('nav-menu-toggle');
+  const links = byId<HTMLElement>('primary-links');
+  if (!button || !links) return;
+  const mobile = matchMedia('(max-width: 800px)');
+  const close = (restoreFocus = false) => {
+    button.setAttribute('aria-expanded', 'false');
+    button.textContent = 'Open menu';
+    links.hidden = mobile.matches;
+    if (restoreFocus) button.focus();
+  };
+  const sync = () => {
+    links.hidden = mobile.matches && button.getAttribute('aria-expanded') !== 'true';
+    if (!mobile.matches) {
+      button.setAttribute('aria-expanded', 'false');
+      button.textContent = 'Open menu';
+    }
+  };
+  button.addEventListener('click', () => {
+    const opening = button.getAttribute('aria-expanded') !== 'true';
+    button.setAttribute('aria-expanded', String(opening));
+    button.textContent = opening ? 'Close menu' : 'Open menu';
+    links.hidden = !opening;
+  });
+  links.querySelectorAll('a').forEach(link => link.addEventListener('click', () => close()));
+  addEventListener('keydown', event => { if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') close(true); });
+  mobile.addEventListener('change', sync);
+  sync();
+}
 function setupConnectivity() { const bar = byId<HTMLElement>('offline-bar'); if (!bar) return; const paint = () => { bar.hidden = navigator.onLine; }; addEventListener('online', paint); addEventListener('offline', paint); paint(); }
 function renderVerification(result: Verification) { const panel = byId<HTMLElement>('verification-result'); if (!panel) return; panel.className = `verification-result ${result.valid ? 'is-valid' : 'is-invalid'}`; panel.replaceChildren(); const mark = document.createElement('span'); mark.className = 'result-mark'; mark.setAttribute('aria-hidden', 'true'); mark.textContent = result.valid ? '✓' : '×'; const kicker = document.createElement('p'); kicker.className = 'result-kicker'; kicker.textContent = result.valid ? 'Receipt verified' : 'Verification failed'; const title = document.createElement(location.pathname.startsWith('/demo') ? 'h2' : 'h3'); title.textContent = result.valid ? `${result.eventCount} linked event${result.eventCount === 1 ? '' : 's'}` : result.message; const text = document.createElement('p'); text.textContent = result.valid ? `Receipt ${result.receiptId}. Every recorded event and the signature match.` : 'Do not rely on this receipt. Ask for the original signed file.'; const caveat = document.createElement('p'); caveat.className = 'result-caveat'; caveat.textContent = 'A valid signature proves integrity, not identity or correctness.'; panel.append(mark, kicker, title, text, caveat); }
 async function verifyText(text: string) { if (text.length > 2_000_000) throw new Error('Receipt exceeds the 2 MB browser limit. Use the CLI verifier.'); const receipt = JSON.parse(text) as Receipt; renderVerification(await verifyReceipt(receipt)); }
 function setupVerifier() { const input = byId<HTMLInputElement>('receipt-file'); const textarea = byId<HTMLTextAreaElement>('receipt-json'); const button = byId<HTMLButtonElement>('verify-button'); const sample = byId<HTMLButtonElement>('sample-button'); const label = document.querySelector<HTMLElement>('.file-label'); if (!input || !textarea || !button || !sample || !label) return; const run = async (text: string) => { try { await verifyText(text); } catch (error) { renderVerification({ valid:false, chainValid:false, signatureValid:false, eventCount:0, message:error instanceof Error ? error.message : 'Could not read this receipt.' }); } }; const load = async () => { try { const response = await fetch('/sample.receipt.json'); if (!response.ok) throw new Error('The sample is unavailable offline until it has been opened once.'); textarea.value = await response.text(); await run(textarea.value); } catch (e) { renderVerification({valid:false, chainValid:false, signatureValid:false, eventCount:0, message:e instanceof Error ? e.message : 'Could not load the sample.'}); } }; input.addEventListener('change', async () => { const file = input.files?.[0]; if (file) { textarea.value = await file.text(); await run(textarea.value); } }); button.addEventListener('click', () => void run(textarea.value)); sample.addEventListener('click', () => void load()); for (const type of ['dragenter','dragover']) label.addEventListener(type, e => { e.preventDefault(); label.classList.add('is-dragging'); }); for (const type of ['dragleave','drop']) label.addEventListener(type, e => { e.preventDefault(); label.classList.remove('is-dragging'); }); label.addEventListener('drop', async (e) => { const file = e.dataTransfer?.files[0]; if (file) { textarea.value = await file.text(); await run(textarea.value); } }); if (DEMO) void load(); }
 function setupCopyButtons() { document.querySelectorAll<HTMLButtonElement>('[data-copy-target]').forEach(button => button.addEventListener('click', async () => { const target = byId<HTMLElement>(button.dataset.copyTarget ?? ''); if (!target) return; await navigator.clipboard.writeText(target.textContent ?? ''); button.textContent = 'Copied commands'; setTimeout(() => button.textContent = 'Copy commands', 1200); })); }
-function setupDemo() { if (!DEMO) return; document.body.classList.add('demo-mode'); const banner = document.createElement('div'); banner.className = 'demo-banner'; banner.setAttribute('role','status'); banner.innerHTML = '<strong>Demo — sample data, separate demo storage</strong><button type="button" id="reset-demo">Reset demo</button><a href="/">Start for real</a>'; document.body.insertBefore(banner, document.querySelector('header')); byId<HTMLButtonElement>('reset-demo')?.addEventListener('click', () => { for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k?.startsWith('demo:')) localStorage.removeItem(k); } location.reload(); }); }
-setupTheme(); setupSkipLink(); setupRouteFocus(); setupConnectivity(); setupVerifier(); setupCopyButtons(); setupDemo();
+function clearDemoStorage() { for (let i = localStorage.length - 1; i >= 0; i--) { const key = localStorage.key(i); if (key?.startsWith('demo:')) localStorage.removeItem(key); } }
+function setupDemo() { if (!DEMO) return; document.body.classList.add('demo-mode'); const banner = document.createElement('div'); banner.className = 'demo-banner'; banner.setAttribute('role','status'); banner.innerHTML = '<strong>Demo — sample data, separate demo storage</strong><button type="button" id="reset-demo">Reset demo</button><a href="/" id="leave-demo">Start for real</a>'; document.body.insertBefore(banner, document.querySelector('header')); byId<HTMLButtonElement>('reset-demo')?.addEventListener('click', () => { clearDemoStorage(); location.reload(); }); byId<HTMLAnchorElement>('leave-demo')?.addEventListener('click', event => { event.preventDefault(); clearDemoStorage(); location.assign('/'); }); }
+setupTheme(); setupSkipLink(); setupRouteFocus(); setupMobileNavigation(); setupConnectivity(); setupVerifier(); setupCopyButtons(); setupDemo();
 if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));

@@ -17,6 +17,7 @@
     "test:cli": "cargo test --all-targets",
     "test:unit": "vitest run",
     "test": "npm run test:cli && npm run test:unit",
+    "pretest:e2e": "npm run build:site",
     "test:e2e": "playwright test",
     "check": "cargo fmt --check && cargo clippy --all-targets -- -D warnings && npm run typecheck && npm test && npm run build && npm run test:e2e"
   },

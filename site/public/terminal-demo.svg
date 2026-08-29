@@ -1,18 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="575" viewBox="0 0 1200 575" role="img" aria-labelledby="title desc">
-  <title id="title">Action Receipts demo terminal recording</title>
-  <desc id="desc">A captured terminal run creates signed JSON and HTML receipts in a new temporary directory.</desc>
-  <rect width="1200" height="575" fill="#0b0b09"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="476" viewBox="0 0 1200 476" role="img" aria-labelledby="title desc">
+  <title id="title">Action Receipts demo terminal capture</title>
+  <desc id="desc">An actual release binary run creates signed JSON and HTML receipts in a new temporary directory.</desc>
+  <rect width="1200" height="476" fill="#0b0b09"/>
   <rect width="1200" height="64" fill="#b9f227"/>
   <circle cx="36" cy="32" r="10" fill="#ff5c35" stroke="#171713" stroke-width="3"/><circle cx="68" cy="32" r="10" fill="#f4f0e6" stroke="#171713" stroke-width="3"/><circle cx="100" cy="32" r="10" fill="#3b5bdb" stroke="#171713" stroke-width="3"/>
-  <text x="140" y="41" fill="#171713" font-family="monospace" font-size="24" font-weight="700">recording · action-receipts demo · v0.1.0</text>
-  <g font-family="monospace" font-size="27" fill="#f7f3e8">
+  <text x="140" y="41" fill="#171713" font-family="monospace" font-size="24" font-weight="700">capture · action-receipts demo · v0.1.0</text>
+  <g font-family="monospace" font-size="20" fill="#f7f3e8">
     <text x="48" y="126" fill="#a8d929">$ action-receipts demo</text>
-    <text x="48" y="186">Demo receipt created in /tmp/action-receipts-demo-4821</text>
-    <text x="48" y="246">JSON: /tmp/action-receipts-demo-4821/docs-deployment.receipt.json</text>
-    <text x="48" y="306">HTML: /tmp/action-receipts-demo-4821/docs-deployment.receipt.html</text>
-    <text x="48" y="366">Verify: action-receipts verify /tmp/action-receipts-demo-4821/</text>
-    <text x="48" y="406">docs-deployment.receipt.json --json</text>
-    <text x="48" y="486" fill="#a8d929">✓ two linked events · signed receipt · local temporary directory</text>
+    <text x="48" y="176">Demo receipt created in /tmp/action-receipts-demo-1919-1787971021251957600</text>
+    <text x="48" y="226">JSON: /tmp/action-receipts-demo-1919-1787971021251957600/docs-deployment.receipt.json</text>
+    <text x="48" y="276">HTML: /tmp/action-receipts-demo-1919-1787971021251957600/docs-deployment.receipt.html</text>
+    <text x="48" y="326">Verify: action-receipts verify</text>
+    <text x="48" y="376">/tmp/action-receipts-demo-1919-1787971021251957600/docs-deployment.receipt.json --json</text>
   </g>
-  <rect x="48" y="520" width="18" height="31" fill="#ff5c35"><animate attributeName="opacity" values="1;1;0;0;1" dur="1.2s" repeatCount="indefinite"/></rect>
+  <rect x="48" y="431" width="16" height="28" fill="#ff5c35"/>
 </svg>

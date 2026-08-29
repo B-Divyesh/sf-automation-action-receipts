@@ -1,1 +1,1 @@
-Record automated changes and verify signed local receipts.
+Record automated changes in signed local receipts and verify them without a server.

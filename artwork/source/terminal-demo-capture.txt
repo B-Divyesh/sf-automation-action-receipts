@@ -1,0 +1,5 @@
+$ action-receipts demo
+Demo receipt created in /tmp/action-receipts-demo-1919-1787971021251957600
+JSON: /tmp/action-receipts-demo-1919-1787971021251957600/docs-deployment.receipt.json
+HTML: /tmp/action-receipts-demo-1919-1787971021251957600/docs-deployment.receipt.html
+Verify: action-receipts verify /tmp/action-receipts-demo-1919-1787971021251957600/docs-deployment.receipt.json --json

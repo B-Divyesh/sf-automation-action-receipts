@@ -17,6 +17,7 @@ terms appear. Commands, labels, version numbers, and URLs are excluded.
 | 9 | A valid receipt shows signed contents have not changed. |
 | 13 | It does not prove approval was legitimate or an action was correct. |
 | 8 | A signed documentation deployment is already loaded below. |
+| 6 | Demo — sample data, separate demo storage. |
 
 ## README
 
@@ -43,6 +44,8 @@ word or inconsistent term is present.
 | 1 | Verify | — |
 | 3 | How it works | — |
 | 1 | Privacy | — |
+| 2 | Open menu | — |
+| 2 | Close menu | — |
 | 3 | Use dark theme | — |
 | 2 | Version 0.1.0 | — |
 | 5 | Record and verify automated changes. | — |
@@ -85,9 +88,9 @@ word or inconsistent term is present.
 | 13 | It does not prove approval was legitimate or an action was correct. | — |
 | 3 | Command-line quick start | — |
 | 8 | Run the sample or use your own change. | — |
-| 8 | Recorded from the released v0.1.0 binary running action-receipts demo. | `terminal-recording` |
+| 9 | Captured from the released v0.1.0 binary running action-receipts demo. | `terminal-recording` |
 | 2 | Copy commands | — |
-| 3 | Download Linux x64 | — |
+| 3 | Download Linux x64 | `linux-download` |
 | 3 | Read the source (GitHub) | — |
 | 2 | Export formats | — |
 | 7 | Export JSON or a self-contained HTML report. | `json-html-export` |
@@ -128,7 +131,7 @@ word or inconsistent term is present.
 | 7 | The demo makes no third-party requests. | `no-third-party-demo-requests` |
 | 10 | See the product privacy and terms pages before using sensitive receipt data. | — |
 | 5 | Test, package, and deploy | — |
-| 7 | `npm run build:site` creates `dist/site`. | — |
+| 7 | `npm run build:site` creates `dist/site`. | `site-build-output` |
 | 7 | Publish `dist/site/` as the static site. | — |
 | 7 | The factory owns deployment and registry publishing. | — |
 | 1 | License | — |
@@ -143,3 +146,17 @@ word or inconsistent term is present.
 | Browser sample | demo |
 | File created by the CLI | receipt file |
 | Input limits | 2 MB browser limit |
+
+## Demo controls
+
+| Words | Text | Result |
+| ---: | --- | --- |
+| 6 | Demo — sample data, separate demo storage | `demo-isolated` |
+| 2 | Reset demo | `demo-isolated` |
+| 3 | Start for real | `demo-isolated` |
+
+## Legal page sentences
+
+All Privacy and Terms sentences are 22 words or fewer. The untestable future
+maintenance sentence identified in F-4-5 is removed. Legal pages use the same
+terms as the landing page: **receipt**, **event**, and **demo**.
