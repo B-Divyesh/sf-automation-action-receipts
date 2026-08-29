@@ -90,10 +90,12 @@ test('@claim:local-verification verifies signed receipts with the CLI network lo
     await context.setOffline(true);
     await page.reload();
     await expect(page.getByText('Receipt verified')).toBeVisible();
+    await expect(page.getByText('Offline mode — local verification still works.')).toBeVisible();
     const box = page.getByRole('textbox', { name: 'Receipt JSON' });
     await box.fill((await box.inputValue()).replace('policy-gate', 'changed-tool'));
     await page.getByRole('button', { name: 'Verify receipt' }).click();
     await expect(page.getByText('Verification failed')).toBeVisible();
+    await expect(page.getByText('Offline mode — local verification still works.')).toBeVisible();
   } finally {
     await context.setOffline(false);
     if (receipt) rmSync(dirname(receipt), { recursive: true, force: true });
@@ -192,6 +194,15 @@ test('@claim:site-build-output includes deployable routes, metadata, offline ass
   const binary = resolve(dist, 'downloads/action-receipts-linux-amd64');
   expect(statSync(binary).mode & 0o111).not.toBe(0);
   expect(execFileSync(binary, ['--version'], { encoding: 'utf8' }).trim()).toBe('action-receipts 0.1.0');
+});
+
+test('demo loading markup keeps a complete heading outline', async ({ request }) => {
+  const response = await request.get('/demo/');
+  expect(response.ok()).toBeTruthy();
+  const markup = await response.text();
+  expect(markup).toContain('<h1 id="demo-title">Verify an automated change.</h1>');
+  expect(markup).toContain('<h2>Loading receipt</h2>');
+  expect(markup).not.toContain('<h3>Loading receipt</h3>');
 });
 
 test('routes, focus, mobile width, and axe have no violations', async ({ page }) => {

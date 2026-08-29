@@ -135,7 +135,7 @@ word or inconsistent term is present.
 | 7 | Publish `dist/site/` as the static site. | — |
 | 7 | The factory owns deployment and registry publishing. | — |
 | 1 | License | — |
-| 4 | MIT — see LICENSE. | — |
+| 4 | MIT — see LICENSE. | `mit-license` |
 
 ## Terminology
 
@@ -158,5 +158,6 @@ word or inconsistent term is present.
 ## Legal page sentences
 
 All Privacy and Terms sentences are 22 words or fewer. The untestable future
-maintenance sentence identified in F-4-5 is removed. Legal pages use the same
-terms as the landing page: **receipt**, **event**, and **demo**.
+maintenance sentence identified in F-4-5 is removed. The MIT references map
+to `mit-license`. Legal pages use the same terms as the landing page:
+**receipt**, **event**, and **demo**.
